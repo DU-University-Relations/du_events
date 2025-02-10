@@ -1,0 +1,102 @@
+<?php
+
+/**
+ * @file
+ * Description.
+ */
+
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function du_event_mini_preprocess_paragraph__mini_calendar_manual_item(&$variables) {
+
+  $node = $variables['content']['field_mini_calendar_item_event'][0]['#node'];
+  $nid = $node->id();
+  $variables['custom']['url'] = Url::fromRoute("entity.node.canonical", ['node' => $nid], ['absolute' => TRUE])->toString();
+  $variables['custom']['title'] = $node->getTitle();
+
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function du_event_mini_preprocess_paragraph__mini_calendar(&$variables) {
+  $aud_field = $variables['content']['field_event_list_aud_filters'] ?? NULL;
+  $aud_join_field = $variables['content']['field_audience_filter_join_type'] ?? NULL;
+  $type_field = $variables['content']['field_event_list_type_filters'] ?? NULL;
+  $type_join_field = $variables['content']['field_type_filter_join_type'] ?? NULL;
+  $unit_term = $variables['content']['field_unit'] ?? NULL;
+  $unit_children_field = $variables['content']['field_include_child_units'] ?? NULL;
+
+  // Populate Audiences Filter.
+  $aud_terms = [];
+  if (!empty($aud_field['#items'])) {
+    $terms = $aud_field['#items']->referencedEntities();
+    $aud_terms = array_map(function ($term) {
+      return $term->id();
+    }, $terms);
+  }
+
+  // Audience filter join type.
+  $aud_join = 'or';
+  if (!empty($aud_join_field['#items'])) {
+    $aud_join = $aud_join_field['#items']->first()->value;
+  }
+
+  // Populate Types Filter.
+  $type_terms = [];
+  if (!empty($type_field['#items'])) {
+    $terms = $type_field['#items']->referencedEntities();
+    $type_terms = array_map(function ($term) {
+      return $term->id();
+    }, $terms);
+  }
+
+  // Type filter join type.
+  $type_join = 'or';
+  if (!empty($type_join_field['#items'])) {
+    $type_join = $type_join_field['#items']->first()->value;
+  }
+
+  // Populate Types Filter.
+  $type_terms = [];
+  if (!empty($type_field['#items'])) {
+    $terms = $type_field['#items']->referencedEntities();
+    $type_terms = array_map(function ($term) {
+      return $term->id();
+    }, $terms);
+  }
+
+  // Unit taxonomy filter.
+  $unit = NULL;
+  if (!empty($unit_term['#items'])) {
+    $unit_terms = $unit_term['#items']->referencedEntities();
+    $unit_term = reset($unit_terms);
+    $unit = $unit_term->id();
+  }
+
+  // Whether to show child terms of unit.
+  $unit_children = FALSE;
+  if (!empty($unit_children_field['#items'])) {
+    $unit_children = !empty($unit_children_field['#items']->first()->value);
+  }
+
+  $variables['custom']['calendar'] = [
+    'view' => [
+      '#type' => 'view',
+      '#name' => 'event_list',
+      '#display_id' => 'mini',
+      '#arguments' => [
+        $unit,
+        $unit_children,
+        $aud_terms,
+        $type_terms,
+        $aud_join,
+        $type_join,
+      ],
+    ],
+  ];
+
+}

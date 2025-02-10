@@ -1,0 +1,6 @@
+du_event_display.ical_download:
+  path: /ical/{nid}
+  defaults:
+    _controller: '\Drupal\du_event_display\Controller\CalendarController::icalDownload'
+  requirements:
+    _access: 'TRUE'

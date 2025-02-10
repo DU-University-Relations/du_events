@@ -1,0 +1,353 @@
+<?php
+
+/**
+ * @file
+ * Description.
+ */
+
+use Drupal\node\Entity\Node;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\Component\Utility\Xss;
+
+/**
+ * Implements hook_theme().
+ */
+function du_event_display_theme($existing, $type, $theme, $path) {
+  return [
+    'event_filter_buttons' => [
+      'variables' => ['options' => NULL],
+      'template' => 'event_filter_buttons',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function du_event_display_preprocess_node__event(&$variables) {
+  $settings = \Drupal::config('du_event_display.settings');
+  $nid = $variables['node']->id();
+
+  $ical_url = Url::fromRoute("du_event_display.ical_download", ['nid' => $nid])->toString();
+
+  $ical_button = <<<BTN
+      <a role="button" href="$ical_url" class="btn  btn--small ">
+              <span class="icon-du-calendar-plus-o" aria-hidden="true"></span> Add to Calendar
+      </a>
+BTN;
+
+  $variables['ical_button'] = [
+    '#markup' => $ical_button,
+  ];
+
+  if (!empty($settings->get('event_list_location'))) {
+    $event_list_node = Node::load((int) $settings->get('event_list_location'));
+    if (!empty($event_list_node)) {
+      $variables['event_list_location'] = Url::fromRoute("entity.node.canonical", ['node' => $event_list_node->id()], ['absolute' => TRUE])->toString();
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ *
+ * Builds custom select boxes required by the client-side JS filters for
+ * audience type or event type. Also embeds the rendered listing View. The View
+ * itself only filters by date range.
+ */
+function du_event_display_preprocess_paragraph__event_list(&$variables) {
+  $type_field = $variables['content']['field_event_list_type_filters'];
+  $unit_term = $variables['content']['field_unit'];
+  $unit_children_field = $variables['content']['field_include_child_units'] ?? NULL;
+  $params = \Drupal::request()->query->all();
+  foreach ($params as $key => $param) {
+    $params[$key] = Xss::filter($param);
+  }
+
+  // *** Populate Types Filter ***.
+  $type_terms = [];
+  if (!empty($type_field['#items'])) {
+    $type_terms = $type_field['#items']->referencedEntities();
+  }
+  if (count($type_terms) == 0) {
+    // No terms selected; display all filters by default.
+    $query = Drupal::entityQuery('taxonomy_term')
+      ->condition('vid', "event_types");
+    $ids = $query->accessCheck(TRUE)->execute();
+    $type_terms = Term::loadMultiple($ids);
+  }
+  usort($type_terms, function ($a, $b) {
+    return ($a->getWeight() > $b->getWeight()) ? 1 : -1;
+  });
+
+  $type_values = [
+    '#options' => ['*' => 'All Event Types'],
+    '#theme' => 'event_filter_buttons',
+  ];
+  foreach ($type_terms as $term) {
+    $tag = $term->field_event_api_tag->getString();
+
+    // Get just the first word of the tag and strip out any commas.
+    if (strpos($tag, ' ') !== FALSE) {
+      $tag = str_replace(',', '', substr($tag, 0, strpos($tag, ' ')));
+    }
+    $label = $term->name->getString();
+    $type_values['#options'][".$tag"] = $label;
+  }
+
+  // Unit taxonomy filter.
+  $unit = NULL;
+  if (!empty($unit_term['#items'])) {
+    $unit_terms = $unit_term['#items']->referencedEntities();
+    $unit_term = reset($unit_terms);
+    $unit = $unit_term->id();
+  }
+
+  // Whether to show child terms of unit.
+  $unit_children = FALSE;
+  if (!empty($unit_children_field['#items'])) {
+    $unit_children = !empty($unit_children_field['#items']->first()->value);
+  }
+
+  // Test / Manipulate Query String to create links to next / prev month and
+  // populate start / end date picker text.
+  if (!empty($params['start_date'])) {
+    $start_date = date_create($params['start_date']);
+  }
+
+  // Keyword search term.
+  $keywords = $params['search'] ?? '';
+
+  // If the start_date query parameter was present but not valid, $start_date
+  // may yet be empty.
+  if (!empty($start_date)) {
+    $start_date_text = $start_date->format("F j");
+  }
+  else {
+    $start_date = date_create('now');
+    $start_date_text = "Start Date";
+  }
+
+  if (!empty($params['end_date'])) {
+    $end_date = date_create($params['end_date']);
+  }
+
+  // If the end_date query parameter was present but not valid, $end_date may
+  // yet be empty.
+  if (!empty($end_date)) {
+    $end_date_text = $end_date->format("F j");
+  }
+  else {
+    $end_date_text = "End Date";
+  }
+
+  // The "next or previous month" selector needs to choose an entire month,
+  // start to finish, regardless of whether the current filters span multiple
+  // months, etc.
+  $this_month = $start_date->format('F Y');
+  $prev_month_date_obj = clone $start_date;
+  $prev_month_date = $prev_month_date_obj->modify('-1 month');
+  $next_month_date_obj = clone $start_date;
+  $next_month_date = $next_month_date_obj->modify('+1 month');
+  $next_next_month_date_obj = clone $start_date;
+  $next_next_month_date = $next_next_month_date_obj->modify('+2 month');
+  $prev_month_url = "?search=" . $keywords . "&start_date=" . $prev_month_date->format('Y-m-01') . "&end_date=" . $start_date->format('Y-m-01');
+  $next_month_url = "?search=" . $keywords . "&start_date=" . $next_month_date->format('Y-m-01') . "&end_date=" . $next_next_month_date->format('Y-m-01');
+
+  // For google, limit the previous and next links to 15 months back, 12 months
+  // forward.
+  $max_future_date = date_create('now +12 months');
+  $max_past_date = date_create('now -15 months');
+  if ($start_date >= $max_future_date) {
+    $next_month_url = "#";
+  }
+  if ($start_date <= $max_past_date) {
+    $prev_month_url = "#";
+  }
+
+  // We need to keep all params except search, so when the search is updated and
+  // submitted, the other params stay selected.
+  $custom_params = $params;
+  unset($custom_params['search']);
+
+  // *** Assign variables ***.
+  $variables['base_path'] = base_path();
+  $variables['custom']['type_filter'] = $type_values;
+  $variables['custom']['calendar'] = [
+    '#prefix' => '<div class="columns large-12">',
+    '#suffix' => '</div>',
+    'view' => [
+      '#type' => 'view',
+      '#name' => 'event_list',
+      '#display_id' => 'default',
+      '#arguments' => [
+        $unit,
+        $unit_children,
+      ],
+    ],
+  ];
+  $variables['custom']['month_name'] = $this_month;
+  $variables['custom']['url_prev'] = $prev_month_url;
+  $variables['custom']['url_next'] = $next_month_url;
+  $variables['custom']['start_date'] = $start_date_text;
+  $variables['custom']['end_date'] = $end_date_text;
+  $variables['custom']['params'] = $custom_params;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Converts Views' default plain text form widgets into date selectors.
+ */
+function du_event_display_form_views_exposed_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $storage = $form_state->getStorage();
+  $view = $storage['view'];
+  if ($view->id() == 'event_list') {
+    $form['start_date']['#type'] = 'date';
+    $form['end_date']['#type'] = 'date';
+  }
+}
+
+/**
+ * Implements hook_views_pre_view().
+ *
+ * Since views doesn't play nice with #default_value settings in its exposed
+ * forms, we have to alter the settings here to impose a default date.
+ */
+function du_event_display_views_pre_view(ViewExecutable $view, $display_id, array &$args) {
+  if ($view->id() == 'event_list') {
+    $filters = $view->display_handler->getOption('filters');
+    $exposed_input = $view->getExposedInput();
+
+    // Handle filters specific to the default or mini display.
+    if ($view->current_display == 'default') {
+      // If no start date was provided, default to the current date.
+      $start_date = new DrupalDateTime();
+      if (empty($exposed_input['start_date'])) {
+        $exposed_input['start_date'] = $start_date->format('Y-m-d');
+      }
+      else {
+        $start_date = new DrupalDateTime($exposed_input['start_date']);
+      }
+
+      // If no end date is specified, use the first of the month following the
+      // month of the start date.
+      if (empty($exposed_input['end_date'])) {
+        $exposed_input['end_date'] = date('Y-m-01', strtotime('+1 month', strtotime($start_date->format('Y-m-d'))));
+      }
+    }
+    elseif ($view->current_display == 'mini') {
+      // Filters for audience and type.
+      if (!empty($args[2])) {
+        $filters['field_event_audience_target_id']['value'] = $args[2];
+      }
+      if (!empty($args[3])) {
+        $filters['field_event_type_target_id']['value'] = $args[3];
+      }
+
+      // Whether to join audience and type filters w/'or' or 'and'.
+      if (!empty($args[4])) {
+        $filters['field_event_audience_target_id']['operator'] = $args[4];
+      }
+      if (!empty($args[5])) {
+        $filters['field_event_type_target_id']['operator'] = $args[5];
+      }
+    }
+
+    // Set the unit taxonomy to filter on.
+    if (!empty($args[0]) && is_numeric($args[0])) {
+      $filters['term_node_tid_depth']['value'] = [$args[0] => $args[0]];
+    }
+    else {
+      // No unit term to filter on, so remove the filter.
+      unset($filters['term_node_tid_depth']);
+    }
+
+    // Set unit taxonomy term depth.
+    if (!empty($args[1])) {
+      // Show children, but set depth to 3 so that the query isn't too complex
+      // to the point of being really slow.
+      $filters['term_node_tid_depth']['depth'] = 3;
+    }
+    else {
+      $filters['term_node_tid_depth']['depth'] = 0;
+    }
+
+    $view->display_handler->overrideOption('filters', $filters);
+    $view->setExposedInput($exposed_input);
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function du_event_display_preprocess_views_view_fields(&$variables) {
+  $view = $variables['view'];
+  if ($view->id() == 'event_list') {
+    // If twig debugging is enabled, these fields come pre-rendered with all the debug HTML comments, so it's helpful to strip that out.
+    $startDate = new DateTime(str_replace("\n", '', strip_tags($variables['fields']['field_event_time_start_date']->content)));
+    $endDate = new DateTime(str_replace("\n", '', strip_tags($variables['fields']['field_event_time_end_date']->content)));
+    $location = str_replace("\n", '', strip_tags($variables['fields']['field_event_time_location']->content));
+    $tags = str_replace("\n", '', strip_tags($variables['fields']['field_event_tags']->content));
+    $tags .= ' ' . str_replace("\n", '', strip_tags($variables['fields']['field_event_audience']->content));
+
+    // Strip out commas because we don't want those in css classes.
+    $tags .= ' ' . str_replace(["\n", ','], '', strip_tags($variables['fields']['field_event_type']->content));
+    $nid = $variables['row']->nid;
+    $url = Url::fromRoute("entity.node.canonical", ['node' => $nid], ['absolute' => TRUE])->toString();
+
+    $variables['custom']['start_date'] = $startDate->format("F j");
+    $variables['custom']['start_time'] = $startDate->format("g:ia");
+    $variables['custom']['end_time'] = $endDate->format("g:ia");
+    $variables['custom']['location'] = $location;
+    $variables['custom']['tags'] = $tags;
+    $variables['custom']['url'] = $url;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function du_event_display_form_system_site_information_settings_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $config = \Drupal::config('du_event_display.settings');
+
+  $form['events_page'] = [
+    '#type' => 'details',
+    '#title' => t('Events Page'),
+    '#open' => TRUE,
+  ];
+
+  $form['events_page']['event_list_location'] = [
+    '#type' => 'entity_autocomplete',
+    '#target_type' => 'node',
+    '#title' => t('Event List Page Location'),
+    '#description' => t('URL to Event List'),
+    '#default_value' => '',
+  ];
+  if (!empty($config->get('event_list_location'))) {
+    $event_list_node = Node::load((int) $config->get('event_list_location'));
+    if (!empty($event_list_node)) {
+      $form['events_page']['event_list_location']['#default_value'] = $event_list_node;
+    }
+  }
+
+  $form['#submit'][] = 'du_event_display_site_information_settings_form_submit';
+
+}
+
+/**
+ * Custom form submission handler for site information form.
+ */
+function du_event_display_site_information_settings_form_submit(array &$form, FormStateInterface $form_state) {
+  $values = $form_state->getValues();
+
+  $config = \Drupal::configFactory()->getEditable('du_event_display.settings');
+  $config
+    ->set('event_list_location', $values['event_list_location'])
+    ->save();
+}
