@@ -1,0 +1,108 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_event_time_place
+    - node.type.event
+    - paragraphs.paragraphs_type.event_time_place
+  module:
+    - entity_reference_revisions
+_core:
+  default_config_hash: IIKfIXQvH58xGhaYDqDL_tZeKMQ07na5-yNscqPN-t4
+id: node.event.field_event_time_place
+field_name: field_event_time_place
+entity_type: node
+bundle: event
+label: 'Time & Place'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    target_bundles:
+      event_time_place: event_time_place
+    negate: 0
+    target_bundles_drag_drop:
+      body_copy:
+        weight: 27
+        enabled: false
+      body_text:
+        weight: 28
+        enabled: false
+      card:
+        weight: 29
+        enabled: false
+      cards:
+        weight: 30
+        enabled: false
+      cta:
+        weight: 31
+        enabled: false
+      embed_code:
+        weight: 32
+        enabled: false
+      event_time_place:
+        weight: 33
+        enabled: true
+      expanding_list:
+        weight: 34
+        enabled: false
+      hero_media:
+        weight: 35
+        enabled: false
+      homepage_facts:
+        weight: 36
+        enabled: false
+      homepage_programs_search:
+        weight: 37
+        enabled: false
+      homepage_quote:
+        weight: 38
+        enabled: false
+      homepage_quotes:
+        weight: 39
+        enabled: false
+      homepage_section_copy:
+        weight: 40
+        enabled: false
+      homepage_video_carousel:
+        weight: 41
+        enabled: false
+      hvc_slide:
+        weight: 42
+        enabled: false
+      quick_facts:
+        weight: 43
+        enabled: false
+      quick_facts_feature_fact:
+        weight: 44
+        enabled: false
+      quick_facts_list_item_simple:
+        weight: 45
+        enabled: false
+      quick_facts_list_of_facts:
+        weight: 46
+        enabled: false
+      related_stories:
+        weight: 47
+        enabled: false
+      show_hide_toggle:
+        weight: 48
+        enabled: false
+      stories:
+        weight: 49
+        enabled: false
+      subhead:
+        weight: 50
+        enabled: false
+      two_col_copy:
+        weight: 51
+        enabled: false
+      two_value_text:
+        weight: 52
+        enabled: false
+field_type: entity_reference_revisions
+
