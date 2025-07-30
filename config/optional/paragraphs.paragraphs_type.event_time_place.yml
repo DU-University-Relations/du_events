@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: Y6lLqs6TSfX1CzLP-NBrpps5JDNjBuFNn4XTBJ_b588
+id: event_time_place
+label: 'Event Time & Place'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }
+

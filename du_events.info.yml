@@ -1,7 +1,7 @@
 name: 'DU Events'
 type: module
 description: 'ADD DESCRIPTION'
-version: 10.18.0
+version: 10.18.1
 core_version_requirement: ^10
 package: 'University of Denver'
 dependencies:

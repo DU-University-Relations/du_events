@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - slick
+_core:
+  default_config_hash: iRp0g6B1Okrafb9pmGZRgXU_4u63L6Eu19OfBLPguDM
+name: 'Embed Code'
+format: embed_code
+weight: -9
+filters:
+  filter_html:
+    id: filter_html
+    provider: filter
+    status: false
+    weight: -10
+    settings:
+      allowed_html: '<script><iframe><embed>'
+      filter_html_help: true
+      filter_html_nofollow: false
+  slick_filter:
+    id: slick_filter
+    provider: slick
+    status: false
+    weight: 4
+    settings:
+      optionset: default
+      media_switch: ''

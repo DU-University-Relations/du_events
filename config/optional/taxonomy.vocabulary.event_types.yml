@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: m--JCRW25i0uixjxDQqFCkacEcjAvw8wyHPmiXl3hoM
+name: 'Event Types'
+vid: event_types
+description: null
+weight: 0
+new_revision: false
+

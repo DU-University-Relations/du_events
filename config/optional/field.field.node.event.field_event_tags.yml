@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_event_tags
+    - node.type.event
+_core:
+  default_config_hash: Bh4sJdVB6S9MMUr2-HssAyULkzVT7D-RczODhGz9nG8
+id: node.event.field_event_tags
+field_name: field_event_tags
+entity_type: node
+bundle: event
+label: Tags
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
+
