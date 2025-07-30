@@ -1,6 +1,6 @@
 {
   "name":             "university-of-denver/du_events",
-  "version":          "10.18.0",
+  "version":          "10.18.1",
   "description":      "Package of Event Related Features",
   "keywords":         ["University of Denver", "drupal"],
   "homepage":         "http://www.du.edu",
