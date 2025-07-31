@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_event_file
+    - node.type.event
+  module:
+    - file
+id: node.event.field_event_file
+field_name: field_event_file
+entity_type: node
+bundle: event
+label: File
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:file'
+  handler_settings: {  }
+  file_directory: events
+  file_extensions: pdf
+  max_filesize: ''
+  description_field: true
+field_type: file

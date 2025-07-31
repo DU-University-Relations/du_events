@@ -1,0 +1,168 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.event.field_content_gallery_image
+    - field.field.node.event.field_content_tags_ref
+    - field.field.node.event.field_event_additional_orgs
+    - field.field.node.event.field_event_api_hash
+    - field.field.node.event.field_event_audience
+    - field.field.node.event.field_event_description
+    - field.field.node.event.field_event_file
+    - field.field.node.event.field_event_id
+    - field.field.node.event.field_event_image
+    - field.field.node.event.field_event_image_upload
+    - field.field.node.event.field_event_primary_org
+    - field.field.node.event.field_event_repeats
+    - field.field.node.event.field_event_tags
+    - field.field.node.event.field_event_time_place
+    - field.field.node.event.field_event_type
+    - field.field.node.event.field_event_unit
+    - node.type.event
+  module:
+    - entity_reference_revisions
+    - file
+    - svg_image
+    - text
+    - user
+_core:
+  default_config_hash: q2HsLQjXmeGbGrPC-L1o784u9TiIyUmPU0CXPPDRGGg
+id: node.event.default
+targetEntityType: node
+bundle: event
+mode: default
+content:
+  content_moderation_control:
+    settings: {  }
+    third_party_settings: {  }
+    weight: -20
+    region: content
+  field_event_additional_orgs:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 109
+    region: content
+  field_event_api_hash:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 112
+    region: content
+  field_event_audience:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 117
+    region: content
+  field_event_description:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 103
+    region: content
+  field_event_file:
+    type: file_default
+    label: above
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    weight: 118
+    region: content
+  field_event_id:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 111
+    region: content
+  field_event_image:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 107
+    region: content
+  field_event_image_upload:
+    type: image
+    label: above
+    settings:
+      image_link: ''
+      image_style: ''
+      svg_attributes:
+        width: null
+        height: null
+      svg_render_as_image: true
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 119
+    region: content
+  field_event_primary_org:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 105
+    region: content
+  field_event_repeats:
+    type: boolean
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    weight: 114
+    region: content
+  field_event_tags:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 110
+    region: content
+  field_event_time_place:
+    type: entity_reference_revisions_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 113
+    region: content
+  field_event_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 116
+    region: content
+  field_event_unit:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 115
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  field_content_gallery_image: true
+  field_content_tags_ref: true

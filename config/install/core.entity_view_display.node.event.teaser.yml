@@ -1,0 +1,58 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.event.field_content_gallery_image
+    - field.field.node.event.field_content_tags_ref
+    - field.field.node.event.field_event_additional_orgs
+    - field.field.node.event.field_event_api_hash
+    - field.field.node.event.field_event_audience
+    - field.field.node.event.field_event_description
+    - field.field.node.event.field_event_file
+    - field.field.node.event.field_event_id
+    - field.field.node.event.field_event_image
+    - field.field.node.event.field_event_image_upload
+    - field.field.node.event.field_event_primary_org
+    - field.field.node.event.field_event_repeats
+    - field.field.node.event.field_event_tags
+    - field.field.node.event.field_event_time_place
+    - field.field.node.event.field_event_type
+    - field.field.node.event.field_event_unit
+    - node.type.event
+  module:
+    - user
+_core:
+  default_config_hash: _rHvrhWu7hwEyzgRkt2MlLALD0w-5aF_TtpfUq0CTCI
+id: node.event.teaser
+targetEntityType: node
+bundle: event
+mode: teaser
+content:
+  content_moderation_control:
+    settings: {  }
+    third_party_settings: {  }
+    weight: -20
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  field_content_gallery_image: true
+  field_content_tags_ref: true
+  field_event_additional_orgs: true
+  field_event_api_hash: true
+  field_event_audience: true
+  field_event_description: true
+  field_event_file: true
+  field_event_id: true
+  field_event_image: true
+  field_event_image_upload: true
+  field_event_primary_org: true
+  field_event_repeats: true
+  field_event_tags: true
+  field_event_time_place: true
+  field_event_type: true
+  field_event_unit: true
