@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: GW3I-0Avoi3SMJYO9hmJT_4j-ObWwpVluwj6tacsG_Y
+name: 'Content Tags'
+vid: content_tags
+description: null
+weight: 0
+new_revision: false

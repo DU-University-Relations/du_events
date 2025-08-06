@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_content_tags_ref
+    - node.type.event
+    - taxonomy.vocabulary.content_tags
+id: node.event.field_content_tags_ref
+field_name: field_content_tags_ref
+entity_type: node
+bundle: event
+label: 'Content Tags'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      content_tags: content_tags
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

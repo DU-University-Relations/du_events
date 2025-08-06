@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_event_api_hash
+    - node.type.event
+_core:
+  default_config_hash: yP96bfwZZeawQT-h0Rfe4Ag1XOguzUJXB3-AEFHJeHo
+id: node.event.field_event_api_hash
+field_name: field_event_api_hash
+entity_type: node
+bundle: event
+label: 'API Hash'
+description: 'Do not change. Used for determining when an event in the API is out of sync with an event in Drupal, and triggering an update.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
