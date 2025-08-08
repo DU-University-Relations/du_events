@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Install and update hooks for the du_events module.
+ */
+
+/**
+ * Implements hook_install().
+ *
+ * Adds the event_list Paragraph type to 
+ * field_page_content field on the node type "page" in ducore when this module is installed.
+ */
+
+function du_events_install() {
+  $field_config = \Drupal::service('config.factory')->getEditable('field.field.node.page.field_page_content');
+  $settings = $field_config->get('settings');
+  if (isset($settings['handler_settings']['target_bundles_drag_drop']['event_list'])) {
+    $settings['handler_settings']['target_bundles_drag_drop']['event_list']['enabled'] = true;
+    $field_config->set('settings',$settings);
+    $field_config->save();
+    \Drupal::logger('du_events')->notice('Enabled event_list in target_bundles_drag_drop.');
+  } else {
+    \Drupal::logger('du_events')->warning('event_list not found in target_bundles_drag_drop.');
+  }
+}
