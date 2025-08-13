@@ -1,0 +1,7 @@
+du_event_import.admin_settings:
+  path: /admin/config/content/du_event_importer
+  defaults:
+    _form: '\Drupal\du_event_import\Form\ModuleConfigurationForm'
+    _title: 'Event Import Configuration'
+  requirements:
+    _permission: 'administer site configuration'

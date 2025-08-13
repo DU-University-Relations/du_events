@@ -1,0 +1,4 @@
+services:
+  du_event_import:
+    class: \Drupal\du_event_import\EventImport
+    arguments: ['@http_client', '@config.factory', '@logger.factory']
