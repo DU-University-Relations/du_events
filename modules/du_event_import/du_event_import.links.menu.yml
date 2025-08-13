@@ -1,0 +1,4 @@
+du_event_import.admin_settings:
+  title: 'DU Event Import Settings'
+  parent: system.admin_config_content
+  route_name: 'du_event_import.admin_settings'

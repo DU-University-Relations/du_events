@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * @file
+ * DU Event module functionality.
+ */
+
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Add custom button for event node edit form.
+ *
+ * Forces resynchronization of a single node with remote data via the API.
+ */
+function du_event_import_form_node_event_edit_form_alter(&$form, FormStateInterface $form_state) {
+  $form['du_event_sync'] = [
+    '#type' => 'submit',
+    '#value' => t('Synchronize from API'),
+    '#weight' => -100,
+    '#submit' => ['du_event_synchronize_submit'],
+  ];
+}
+
+/**
+ * Form submit handler for custom button on event node edit form.
+ */
+function du_event_synchronize_submit($form, FormStateInterface $form_state) {
+  $node = $form_state->getFormObject()->getEntity();
+  $id = $node->get('field_event_id')->value;
+
+  $event_import = \Drupal::service('du_event_import');
+  $response = $event_import->getEvent($id);
+
+  if (!empty($response)) {
+    $data = Json::decode((string) $response->getBody());
+
+    if (!empty($data)) {
+      $data = reset($data);
+      $event_import->importNode($node, $data);
+    }
+  }
+}

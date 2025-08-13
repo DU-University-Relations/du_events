@@ -1,0 +1,10 @@
+services:
+  du_event_import.commands:
+    class: \Drupal\du_event_import\Commands\EventImportCommands
+    arguments:
+      - '@du_event_import'
+      - '@queue'
+      - '@logger.factory'
+      - '@entity_type.manager'
+    tags:
+      - { name: drush.command }
