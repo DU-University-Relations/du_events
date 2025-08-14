@@ -2,7 +2,6 @@
 
 namespace Drupal\du_event_import;
 
-use Drupal\du_queue_alerts\QueueAlertsTrait;
 use Drupal\node\Entity\Node;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\user\Entity\User;
@@ -16,8 +15,6 @@ use GuzzleHttp\ClientInterface;
  * Event Import service class.
  */
 class EventImport {
-
-  use QueueAlertsTrait;
 
   /**
    * An ACME Services - Contents HTTP Client.
@@ -51,7 +48,6 @@ class EventImport {
    *   The logger factory.
    */
   public function __construct(ClientInterface $http_client, ConfigFactoryInterface $config_factory, LoggerChannelFactoryInterface $logger) {
-    $this->setModule('du_event_import');
     $this->httpClient = $http_client;
     $this->configFactory = $config_factory;
     $this->loggerFactory = $logger;
