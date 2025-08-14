@@ -5,4 +5,3 @@ package: 'DU Event Import'
 core_version_requirement: ^8 || ^9 || ^10
 configure: du_event_import.admin_settings
 dependencies:
-  - du_queue_alerts
