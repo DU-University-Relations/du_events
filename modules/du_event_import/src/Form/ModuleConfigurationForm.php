@@ -114,9 +114,16 @@ class ModuleConfigurationForm extends ConfigFormBase {
       '#default_value' => $config->get('client_id'),
     ];
     $form['client_secret'] = [
-      '#type' => 'textfield',
+      '#type' => 'item',
       '#title' => $this->t('Client Secret'),
-      '#default_value' => $config->get('client_secret'),
+      '#markup' => $this->t('Using Key: <code>du_event_import_key</code>'),
+      '#description' => $this->t('This value is only editable via the Terminus Secrets Manager Plugin'),
+    ];
+    $form['calendars'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Web Calendar(s)'),
+      '#description' => $this->t('Separate multiple Web Calendar IDs with commas (no whitespace)'),
+      '#default_value' => $config->get('calendars'),
     ];
     $form['search_window'] = [
       '#type' => 'textfield',
@@ -219,7 +226,8 @@ class ModuleConfigurationForm extends ConfigFormBase {
     $this->config('du_event_import.settings')
       ->set('api_url', $values['api_url'])
       ->set('client_id', $values['client_id'])
-      ->set('client_secret', $values['client_secret'])
+      // ->set('client_secret', $values['client_secret'])
+      ->set('calendars', $values['calendars'])
       ->set('search_window', $values['search_window'])
       ->save();
   }

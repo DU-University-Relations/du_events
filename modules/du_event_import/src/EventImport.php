@@ -9,6 +9,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+// use Drupal\pantheon_secrets\Commands\PantheonSecretsCommands;
 use GuzzleHttp\ClientInterface;
 
 /**
@@ -69,7 +70,14 @@ class EventImport {
     // Config variables.
     $url = $config->get('api_url');
     $client_id = $config->get('client_id');
-    $client_secret = $config->get('client_secret');
+    $client_secret = pantheon_get_secret('du_event_import_key');
+
+    // Check that the secret is set by pantheon
+    if (empty($client_secret)) {
+      $logger->error(
+        'No client secret found'
+      );
+    }
 
     // Check for API URL before proceeding.
     if (empty($url)) {
@@ -106,11 +114,6 @@ class EventImport {
             '@status' => $e->getCode(),
           ]
         );
-        $this->addError(
-          'An attempt to import an event from %s failed with a %s status code.',
-          $url,
-          $e->getCode()
-        );
       }
     }
 
@@ -132,8 +135,16 @@ class EventImport {
     // Config variables.
     $url = $config->get('api_url');
     $client_id = $config->get('client_id');
-    $client_secret = $config->get('client_secret');
+    $client_secret = pantheon_get_secret('du_event_import_key');
+    $calendars = $config->get('calendars');
     $search_window = $config->get('search_window');
+
+    // Check that the secret is set by pantheon
+    if (empty($client_secret)) {
+      $logger->error(
+        'No client secret found'
+      );
+    }
 
     // Check for API URL before proceeding.
     if (empty($url)) {
@@ -161,6 +172,7 @@ class EventImport {
         $query = http_build_query([
           'client_id' => $client_id,
           'client_secret' => $client_secret,
+          'calendars' => $calendars,
           'start_date' => $start_date->format('Y-m-d'),
           'public' => 'true',
         ]);
@@ -190,11 +202,6 @@ class EventImport {
               '@url' => $url . '?' . $query,
               '@status' => $e->getCode(),
             ]
-          );
-          $this->addError(
-            'An attempt to import events from %s failed with a %s status code.',
-            $url . '?' . $query,
-            $e->getCode()
           );
         }
 
@@ -230,42 +237,38 @@ class EventImport {
     $audiences = $types = [];
     $audience_terms_array = $type_terms_array = [];
     if (!empty($event['audiences'])) {
-      foreach ($event['audiences'] as $audience) {
-        $audience = explode(' - ', $audience);
-        if ($audience[0] == 'Type') {
-          $types[] = $audience[1];
-        }
-        elseif ($audience[0] == 'Audience') {
-          $audiences[] = $audience[1];
-        }
-      }
+      $audiences = $event['audiences'];
+    }
+    if (!empty($event['eventType'])){
+      $types = $event['eventType'];
+    }
 
-      if (!empty($audiences)) {
-        $audience_terms = \Drupal::entityQuery('taxonomy_term')
-          ->accessCheck(TRUE)
-          ->condition('vid', 'event_audiences')
-          ->condition('field_event_api_tag', $audiences, 'IN')
-          ->execute();
-        if (!empty($audience_terms)) {
-          foreach ($audience_terms as $key => $term) {
-            $audience_terms_array[] = ['target_id' => $key];
-          }
-        }
-      }
-
-      if (!empty($types)) {
-        $type_terms = \Drupal::entityQuery('taxonomy_term')
-          ->accessCheck(TRUE)
-          ->condition('vid', 'event_types')
-          ->condition('field_event_api_tag', $types, 'IN')
-          ->execute();
-        if (!empty($type_terms)) {
-          foreach ($type_terms as $key => $term) {
-            $type_terms_array[] = ['target_id' => $key];
-          }
+    if (!empty($audiences)) {
+      $audience_terms = \Drupal::entityQuery('taxonomy_term')
+        ->accessCheck(TRUE)
+        ->condition('vid', 'event_audiences')
+        ->condition('field_event_api_tag', $audiences, 'IN')
+        ->execute();
+      if (!empty($audience_terms)) {
+        foreach ($audience_terms as $key => $term) {
+          $audience_terms_array[] = ['target_id' => $key];
         }
       }
     }
+
+    if (!empty($types)) {
+      $type_terms = \Drupal::entityQuery('taxonomy_term')
+        ->accessCheck(TRUE)
+        ->condition('vid', 'event_types')
+        ->condition('field_event_api_tag', $types, 'IN')
+        ->execute();
+      if (!empty($type_terms)) {
+        foreach ($type_terms as $key => $term) {
+          $type_terms_array[] = ['target_id' => $key];
+        }
+      }
+    }
+
 
     $primaryOrg = '';
     $additional_orgs = [];
@@ -281,12 +284,15 @@ class EventImport {
       }
     }
 
-    // Match up org IDs with the unit taxonomy term.
+    // Match up org IDs with the unit taxonomy term if the IDs exits.
+    $unit_ids = [];
+    if (!empty($orgs)) {
     $unit_ids = \Drupal::entityQuery('taxonomy_term')
       ->accessCheck(TRUE)
       ->condition('vid', 'unit')
       ->condition('field_25_live_id', $orgs, 'IN')
       ->execute();
+    };
 
     $description = '';
     if (!empty($event['description'])) {
