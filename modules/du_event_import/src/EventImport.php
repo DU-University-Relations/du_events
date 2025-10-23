@@ -239,7 +239,7 @@ class EventImport {
     if (!empty($event['audiences'])) {
       $audiences = $event['audiences'];
     }
-    if (!empty($event['eventType'])){
+    if (!empty($event['eventType'])) {
       $types = $event['eventType'];
     }
 
