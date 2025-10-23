@@ -284,7 +284,7 @@ class EventImport {
       }
     }
 
-    // Match up org IDs with the unit taxonomy term if the IDs exits.
+    // Match up org IDs with the unit taxonomy term if the IDs exist.
     $unit_ids = [];
     if (!empty($orgs)) {
     $unit_ids = \Drupal::entityQuery('taxonomy_term')
