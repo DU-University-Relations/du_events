@@ -226,7 +226,6 @@ class ModuleConfigurationForm extends ConfigFormBase {
     $this->config('du_event_import.settings')
       ->set('api_url', $values['api_url'])
       ->set('client_id', $values['client_id'])
-      // ->set('client_secret', $values['client_secret'])
       ->set('calendars', $values['calendars'])
       ->set('search_window', $values['search_window'])
       ->save();
