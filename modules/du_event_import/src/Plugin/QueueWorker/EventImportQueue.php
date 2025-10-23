@@ -110,8 +110,6 @@ class EventImportQueue extends QueueWorkerBase implements ContainerFactoryPlugin
             $node = $node_storage->create(['type' => 'event']);
             $isNew = TRUE;
           }
-      
-
         // Import/update the node if it is new or the hash has changed.
         if ($isNew || $node->get('field_event_api_hash')->value != $this->eventImport->getHash($event)) {
           $this->eventImport->importNode($node, $data);
