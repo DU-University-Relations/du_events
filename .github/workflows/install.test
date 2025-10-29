@@ -1,0 +1,87 @@
+name: DU Events Install Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout module
+        uses: actions/checkout@v4
+        with:
+            path: du_events
+
+      - name: Create test directory
+        run: mkdir drupal-test
+
+      - name: Install DDEV
+        working-directory: drupal-test
+        run: |
+          curl -fsSL https://ddev.com/install.sh | bash
+          ddev --version
+
+      - name: Configure and start DDEV
+        working-directory: drupal-test
+        run: |
+          ddev config --project-type=drupal10 --docroot=web --create-docroot
+          ddev start
+
+      - name: Install Drupal with Profile
+        working-directory: drupal-test
+        run: |
+          # Backup and clear directory
+          mv .ddev ../ddev-backup
+          rm -rf *
+
+          # Clone and setup repository
+          git clone https://github.com/University-of-Denver/drupal-composer-managed.git .
+          rm -rf .ddev
+          mv ../ddev-backup .ddev
+
+          # Install dependencies and copy theme
+          ddev composer install
+
+          # Add module code from PR to site as a CUSTOM module to override the contrib version of the same module
+          mkdir -p web/modules/custom 
+          cp -r ../du_events web/modules/custom/du_events
+
+
+      - name: Setup Database
+        working-directory: drupal-test
+        run: |
+          mkdir -p web/sites/default/files
+          chmod 777 web/sites/default/files
+
+          cat << 'EOSETTINGS' > web/sites/default/settings.local.php
+          <?php
+          $databases['default']['default'] = [
+            'database' => 'db',
+            'username' => 'db',
+            'password' => 'db',
+            'host' => 'db',
+            'port' => '3306',
+            'driver' => 'mysql',
+            'prefix' => '',
+          ];
+          $settings['hash_salt'] = 'test';
+          EOSETTINGS
+
+          cp web/sites/default/default.settings.php web/sites/default/settings.php
+          echo "include \$app_root . '/' . \$site_path . '/settings.local.php';" >> web/sites/default/settings.php
+
+      - name: Install site
+        working-directory: drupal-test
+        run: |
+          ddev exec drush site:install ducore \
+            --account-name=admin \
+            --account-pass=admin \
+            --site-name="Test Site" \
+            --yes
+
+          ddev exec drush en du_events
+          ddev exec drush cr
