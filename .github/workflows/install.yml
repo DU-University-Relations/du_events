@@ -47,7 +47,7 @@ jobs:
           ddev composer install
 
           # Add module code from PR to site as a CUSTOM module to override the contrib version of the same module
-          mkdir -p web/modules/custom 
+          mkdir -p web/modules/custom
           cp -r ../du_events web/modules/custom/du_events
 
 
