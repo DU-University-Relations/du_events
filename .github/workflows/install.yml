@@ -43,7 +43,7 @@ jobs:
           rm -rf .ddev
           mv ../ddev-backup .ddev
 
-          # Install dependencies and copy theme
+          # Install dependencies
           ddev composer install
 
           # Add module code from PR to site as a CUSTOM module to override the contrib version of the same module
