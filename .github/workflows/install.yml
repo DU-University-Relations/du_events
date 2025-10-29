@@ -50,7 +50,6 @@ jobs:
           mkdir -p web/modules/custom
           cp -r ../du_events web/modules/custom/du_events
 
-
       - name: Setup Database
         working-directory: drupal-test
         run: |
@@ -83,5 +82,8 @@ jobs:
             --site-name="Test Site" \
             --yes
 
+      - name: Install du_events
+        working-directory: drupal-test
+        run: |
           ddev exec drush en du_events
           ddev exec drush cr
