@@ -27,6 +27,10 @@ jobs:
         uses: ddev/github-action-setup-ddev@v1
         with:
           ddevDir: upstream
+          autostart: false
+        run: |
+          ddev config --project-type=drupal10 --docroot=web --create-docroot
+          ddev start
 
       - name: Install Drupal with Profile
         working-directory: upstream
