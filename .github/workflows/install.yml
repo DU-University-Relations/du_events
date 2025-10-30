@@ -28,9 +28,12 @@ jobs:
         with:
           ddevDir: upstream
           autostart: false
+        
+      - name: Configure and start DDEV
         run: |
           ddev config --project-type=drupal10 --docroot=web --create-docroot
           ddev start
+        working-directory: upstream
 
       - name: Install Drupal with Profile
         working-directory: upstream
