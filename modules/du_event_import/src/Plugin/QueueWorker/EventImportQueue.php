@@ -3,7 +3,6 @@
 namespace Drupal\du_event_import\Plugin\QueueWorker;
 
 use Drupal\du_event_import\EventImport;
-use Drupal\du_queue_alerts\QueueAlertsTrait;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
@@ -21,8 +20,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class EventImportQueue extends QueueWorkerBase implements ContainerFactoryPluginInterface {
-
-  use QueueAlertsTrait;
 
   /**
    * Entity type manager.
@@ -60,7 +57,6 @@ class EventImportQueue extends QueueWorkerBase implements ContainerFactoryPlugin
     EventImport $event_import,
     LoggerChannelFactoryInterface $logger
   ) {
-    $this->setModule('du_event_import');
     $this->entityTypeManager = $entity_type_manager;
     $this->eventImport = $event_import;
     $this->loggerFactory = $logger;
@@ -81,14 +77,12 @@ class EventImportQueue extends QueueWorkerBase implements ContainerFactoryPlugin
    * {@inheritdoc}
    */
   public function processItem($event) {
-    $this->addCount();
     $logger = $this->loggerFactory->get('du_event_import');
 
     $response = $this->eventImport->getEvent($event['id']);
 
     if ($response) {
       $data = Json::decode((string) $response->getBody());
-
       if (!empty($data)) {
         $data = reset($data);
 
@@ -96,10 +90,6 @@ class EventImportQueue extends QueueWorkerBase implements ContainerFactoryPlugin
           $logger->error(
             "The event import queue worker skipped over event ID %event_id because it didn't get valid data from the API.",
             ['%event_id' => $event['id']]
-          );
-          $this->addError(
-            "The event import queue worker skipped over event ID %s because it didn't get valid data from the API.",
-            $event['id']
           );
           return;
         }
@@ -116,27 +106,10 @@ class EventImportQueue extends QueueWorkerBase implements ContainerFactoryPlugin
           $node = $node_storage->load(reset($nids));
         }
         else {
-          // Check and import event if it has both Audience Type and Event Type.
-          $validation_status = $this->hasAudienceEventTypeCheck($data);
-          if (!$validation_status) {
-            // Validation status = FALSE so skip event from import.
-            $logger->error(
-              "The event import queue worker skipped over event ID %event_id because it is missing audiences or event type.",
-              ['%event_id' => $event['id']]
-            );
-            $this->addError(
-              "The event import queue worker skipped over event ID %s because it is missing audiences or event type.",
-              $event['id']
-            );
-            return;
-          }
-          else {
             // Create new Event node for import.
             $node = $node_storage->create(['type' => 'event']);
             $isNew = TRUE;
           }
-        }
-
         // Import/update the node if it is new or the hash has changed.
         if ($isNew || $node->get('field_event_api_hash')->value != $this->eventImport->getHash($event)) {
           $this->eventImport->importNode($node, $data);
@@ -160,11 +133,6 @@ class EventImportQueue extends QueueWorkerBase implements ContainerFactoryPlugin
             '%event_id' => $event['id'],
           ]
         );
-        $this->addError(
-          'The event import queue worker was executed and got a %s response from the API, but failed to parse the data for event ID: %s.',
-          $response->getStatusCode(),
-          $event['id']
-        );
       }
     }
     else {
@@ -172,47 +140,6 @@ class EventImportQueue extends QueueWorkerBase implements ContainerFactoryPlugin
         'The event import queue worker was executed but failed to get the event ID %event_id from the API.',
         ['%event_id' => $event['id']]
       );
-      $this->addError(
-        'The event import queue worker was executed but failed to get the event ID %s from the API.',
-        $event['id']
-      );
     }
   }
-
-  /**
-   * Checks if Event has both Audience Type and Event Type.
-   *
-   * @param object $event
-   *   The event object.
-   *
-   * @return bool
-   *   TRUE if the event has both field values, FALSE otherwise.
-   */
-  public function hasAudienceEventTypeCheck($event) {
-
-    // Default validation status to false.
-    $validation_status = FALSE;
-
-    // Check for Audience Type and Event Type.
-    $audiences = $types = [];
-    if (!empty($event['audiences'])) {
-      foreach ($event['audiences'] as $audience) {
-        $audience = explode(' - ', $audience);
-        if ($audience[0] == 'Type') {
-          $types[] = $audience[1];
-        }
-        elseif ($audience[0] == 'Audience') {
-          $audiences[] = $audience[1];
-        }
-      }
-    }
-
-    if (!empty($audiences) && !empty($types)) {
-      // Event has both so set validation status to true.
-      $validation_status = TRUE;
-    }
-
-    return $validation_status;
-  }
-
 }

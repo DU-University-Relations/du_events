@@ -4,7 +4,6 @@ namespace Drupal\du_event_import\Commands;
 
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\du_event_import\EventImport;
-use Drupal\du_queue_alerts\QueueAlertsTrait;
 use Drush\Commands\DrushCommands;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -15,8 +14,6 @@ use Drupal\Core\Queue\QueueFactory;
  * A Drush commandfile for the event importer.
  */
 class EventImportCommands extends DrushCommands {
-
-  use QueueAlertsTrait;
 
   /**
    * The Event Import service.
@@ -64,7 +61,6 @@ class EventImportCommands extends DrushCommands {
     LoggerChannelFactoryInterface $logger,
     EntityTypeManagerInterface $entity_type_manager
   ) {
-    $this->setModule('du_event_import');
     $this->eventImport = $event_import;
     $this->queueFactory = $queue_factory;
     $this->loggerFactory = $logger;
@@ -97,7 +93,6 @@ class EventImportCommands extends DrushCommands {
     else {
       $error = 'The drush du:event-queue command was executed and got a response from the API, but failed to parse the data.';
       $logger->error($error);
-      $this->addError($error);
     }
   }
 
