@@ -1,7 +1,8 @@
 name: DU Event Import
-description: Import Event Entities
+description: Direct import for Event Entities
 type: module
-package: 'DU Event Import'
+version: 10.28.0-alpha
+package: 'DU Events'
 core_version_requirement: ^8 || ^9 || ^10
 configure: du_event_import.admin_settings
 dependencies:
