@@ -1,0 +1,25 @@
+name: e2e for D10 DU Core Profile
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      upstream_ref:
+        description: 'Optional ref (branch/tag/SHA) of drupal-composer-managed to use'
+        required: false
+        default: ''
+
+concurrency:
+  group: e2e-d10-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    uses: DU-University-Relations/.github/.github/workflows/playwright-d10-reusable.yml@main
+    with:
+      enabled_modules: "du_events"
+      test_tags: "@du_events"
+      profile_ref: ${{ github.event.inputs.upstream_ref || '' }}
+    secrets:
+      MS_TEAMS_FAILED_TEST_RUN_WEBHOOK_URL: ${{ secrets.MS_TEAMS_FAILED_TEST_RUN_WEBHOOK_URL }}

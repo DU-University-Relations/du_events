@@ -95,7 +95,7 @@
 .DS_Store*
 
 # Ignore local dev environments #
-#/.idea/
+/.idea/
 /.vscode/
 #/.ddev/
 !.ddev/config.yml
