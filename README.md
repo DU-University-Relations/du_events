@@ -1,6 +1,7 @@
 # DU Events
 
-This is the DU Events repository providing Drupal sites the ability to...
+This is the DU Events repository providing Drupal sites the ability to add and display events 
+coming from...
 
 ## Main Documentation
 
