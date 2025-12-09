@@ -1,6 +1,6 @@
 # DU Core Profile Tests
 
-These are the tests for the DU Banners package.
+These are the tests for the DU Events package.
 
 ## Testing Docs
 
@@ -14,7 +14,7 @@ General testing documentation:
 ## Testing Setup
 
 You will need to have a local development environment set up with a DU Core profile. Then, you 
-will need to enable the DU Banners package and the DU Functional Testing module to run the tests.
+will need to enable the DU Events package and the DU Functional Testing module to run the tests.
 
 ```bash
 ddev drush en du_events du_functional_testing -y
