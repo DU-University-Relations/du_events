@@ -23,4 +23,4 @@ jobs:
       profile_ref: ${{ github.event.inputs.upstream_ref || '' }}
     secrets:
       D9_PROFILE_PAT: ${{ secrets.D9_PROFILE_PAT }}
-#      MS_TEAMS_FAILED_TEST_RUN_WEBHOOK_URL: ${{ secrets.MS_TEAMS_FAILED_TEST_RUN_WEBHOOK_URL }}
+      MS_TEAMS_FAILED_TEST_RUN_WEBHOOK_URL: ${{ secrets.MS_TEAMS_FAILED_TEST_RUN_WEBHOOK_URL }}
