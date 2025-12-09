@@ -1,8 +1,8 @@
 name: 'DU Events'
 type: module
-description: 'ADD DESCRIPTION'
+description: 'Provides a complete suite of tools for importing, displaying, and managing events.'
 version: 10.28.0-alpha
-core_version_requirement: ^10
+core_version_requirement: ^9 || ^10
 package: 'University of Denver'
 dependencies:
 
