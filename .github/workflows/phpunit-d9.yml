@@ -1,0 +1,14 @@
+name: PHPUnit Tests
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-d9:
+    uses: DU-University-Relations/.github/.github/workflows/phpunit-d9-reusable.yml@main
+    with:
+      test_paths: 'web/modules/packages/du_events'
+    secrets:
+      D9_PROFILE_PAT: ${{ secrets.D9_PROFILE_PAT }}
+#      MS_TEAMS_FAILED_TEST_RUN_WEBHOOK_URL: ${{ secrets.MS_TEAMS_FAILED_TEST_RUN_WEBHOOK_URL }}
