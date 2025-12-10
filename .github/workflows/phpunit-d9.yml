@@ -1,4 +1,4 @@
-name: PHPUnit Tests
+name: Drupal 9 PHPUnit Tests
 
 on:
   pull_request:
