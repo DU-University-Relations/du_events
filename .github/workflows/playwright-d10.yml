@@ -2,7 +2,7 @@ name: e2e for D10 DU Core Profile
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ none ]
   workflow_dispatch:
     inputs:
       upstream_ref:

@@ -39,8 +39,20 @@ Quick start:
 - [Install Testing on a Package](https://ducloudwiki.atlassian.net/wiki/x/F4DDRQ) has
   instructions on how to install the testing infrastructure on a package.
 
+### Playwright Tests
+
 See [the testing README document](tests/playwright/README.md) for more information on writing
 and running tests.
+
+## PHPUnit Tests
+
+The unit tests are located in the submodules, as the main `du_events` module does not contain
+any PHP logic to test. 
+
+```shell
+# Run unit tests.
+ddev exec vendor/bin/phpunit -c web/core/phpunit.xml.dist web/modules/packages/du_events
+```
 
 ## Dependencies
 
