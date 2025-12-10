@@ -1,0 +1,13 @@
+name: Drupal 10 PHPUnit Tests
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-d10:
+    uses: DU-University-Relations/.github/.github/workflows/phpunit-d10-reusable.yml@main
+    with:
+      test_paths: 'web/modules/packages/du_events'
+#    secrets:
+#      MS_TEAMS_FAILED_TEST_RUN_WEBHOOK_URL: ${{ secrets.MS_TEAMS_FAILED_TEST_RUN_WEBHOOK_URL }}
