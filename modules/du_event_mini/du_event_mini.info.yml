@@ -1,5 +1,5 @@
 name: DU Mini Events
-description: Temporary module to facility mini events feed for unit sites.
+description: Temporary module to facilitate mini events feed for unit sites.
 type: module
 version: 10.28.0
 package: 'DU Events'
