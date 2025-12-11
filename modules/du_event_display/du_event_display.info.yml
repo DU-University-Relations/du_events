@@ -1,6 +1,7 @@
 name: DU Event Display
 description: Custom functionality to display event entities and generate iCal links
 type: module
+version: 10.28.0
 core_version_requirement: ^8 || ^9 || ^10
 configure: du_event_display.admin_settings
-package: du
+package: 'DU Events'
