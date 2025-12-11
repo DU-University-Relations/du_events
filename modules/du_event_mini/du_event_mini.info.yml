@@ -1,7 +1,7 @@
 name: DU Mini Events
 description: Temporary module to facility mini events feed for unit sites.
 type: module
-version: 10.28.0-alpha
+version: 10.28.0
 package: 'DU Events'
 core_version_requirement: ^8 || ^9 || ^10
 dependencies:
