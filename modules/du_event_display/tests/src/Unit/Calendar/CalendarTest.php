@@ -25,7 +25,7 @@ final class CalendarTest extends UnitTestCase {
     $calendar = new Calendar([]);
     $output = $calendar->generateString();
 
-    self::assertStringContainsString('X-WR-CALNAME: Calendar', $output);
+    self::assertStringContainsString('X-WR-CALNAME:Calendar', $output);
     self::assertStringContainsString('PRODID:-//Calender Generator//NONSGML//EN', $output);
   }
 
@@ -38,7 +38,7 @@ final class CalendarTest extends UnitTestCase {
     $calendar = new Calendar(['title' => 'My Custom Calendar']);
     $output = $calendar->generateString();
 
-    self::assertStringContainsString('X-WR-CALNAME: My Custom Calendar', $output);
+    self::assertStringContainsString('X-WR-CALNAME:My Custom Calendar', $output);
   }
 
   /**
@@ -104,6 +104,37 @@ final class CalendarTest extends UnitTestCase {
 
     self::assertStringContainsString('UID:1', $output);
     self::assertStringContainsString('UID:2', $output);
+  }
+
+  /**
+   * Tests that ICS format has no extra whitespace.
+   *
+   * @covers ::generateString
+   */
+  public function testIcsFormatNoExtraWhitespace(): void {
+    $calendar = new Calendar([]);
+    $output = $calendar->generateString();
+
+    // Check that lines don't have leading whitespace (except after \r\n).
+    $lines = explode("\r\n", $output);
+    foreach ($lines as $line) {
+      if (!empty($line)) {
+        // Lines should not start with whitespace.
+        self::assertDoesNotMatchRegularExpression('/^\s/', $line, "Line should not start with whitespace: '$line'");
+      }
+    }
+  }
+
+  /**
+   * Tests that output ends with END:VCALENDAR and proper line ending.
+   *
+   * @covers ::generateString
+   */
+  public function testOutputEndsCorrectly(): void {
+    $calendar = new Calendar([]);
+    $output = $calendar->generateString();
+
+    self::assertStringEndsWith("END:VCALENDAR\r\n", $output);
   }
 
 }
