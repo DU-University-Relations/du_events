@@ -18,8 +18,9 @@ final class CalendarEventTest extends UnitTestCase {
   /**
    * Creates a mock field value object.
    *
-   * The CalendarEvent::formatValue() method expects objects with a 'value'
-   * property, similar to Drupal field items.
+   * The CalendarEvent::formatValue() method can handle both plain strings
+   * and objects with a 'value' property (like Drupal field items).
+   * This helper creates field objects for testing that code path.
    *
    * @param string $value
    *   The string value.
@@ -277,6 +278,153 @@ final class CalendarEventTest extends UnitTestCase {
 
     // Location should be present but empty.
     self::assertStringContainsString('LOCATION:', $output);
+  }
+
+  /**
+   * Tests that URL is included when provided.
+   *
+   * @covers ::generateString
+   */
+  public function testUrlIsIncluded(): void {
+    $start = new \DateTime('2024-01-15 10:00:00', new \DateTimeZone('UTC'));
+    $end = new \DateTime('2024-01-15 11:00:00', new \DateTimeZone('UTC'));
+
+    $event = new CalendarEvent([
+      'uid' => 'test-uid',
+      'start' => $start,
+      'end' => $end,
+      'summary' => 'Test Event',
+      'description' => 'Test Description',
+      'url' => 'https://www.du.edu/events/test-event',
+    ]);
+
+    $output = $event->generateString();
+
+    self::assertStringContainsString('URL:https://www.du.edu/events/test-event', $output);
+  }
+
+  /**
+   * Tests that URL is omitted when empty.
+   *
+   * @covers ::generateString
+   */
+  public function testUrlOmittedWhenEmpty(): void {
+    $start = new \DateTime('2024-01-15 10:00:00', new \DateTimeZone('UTC'));
+    $end = new \DateTime('2024-01-15 11:00:00', new \DateTimeZone('UTC'));
+
+    $event = new CalendarEvent([
+      'uid' => 'test-uid',
+      'start' => $start,
+      'end' => $end,
+      'summary' => 'Test Event',
+      'description' => '',
+    ]);
+
+    $output = $event->generateString();
+
+    self::assertStringNotContainsString('URL:', $output);
+  }
+
+  /**
+   * Tests that plain strings work for summary and description.
+   *
+   * @covers ::generateString
+   */
+  public function testPlainStringsWork(): void {
+    $start = new \DateTime('2024-01-15 10:00:00', new \DateTimeZone('UTC'));
+    $end = new \DateTime('2024-01-15 11:00:00', new \DateTimeZone('UTC'));
+
+    $event = new CalendarEvent([
+      'uid' => 'test-uid',
+      'start' => $start,
+      'end' => $end,
+      'summary' => 'Plain String Title',
+      'description' => 'Plain string description',
+      'location' => 'Conference Room',
+    ]);
+
+    $output = $event->generateString();
+
+    self::assertStringContainsString('SUMMARY:Plain String Title', $output);
+    self::assertStringContainsString('DESCRIPTION:Plain string description', $output);
+    self::assertStringContainsString('LOCATION:Conference Room', $output);
+  }
+
+  /**
+   * Tests that newlines are escaped in description.
+   *
+   * @covers ::generateString
+   */
+  public function testNewlinesAreEscaped(): void {
+    $start = new \DateTime('2024-01-15 10:00:00', new \DateTimeZone('UTC'));
+    $end = new \DateTime('2024-01-15 11:00:00', new \DateTimeZone('UTC'));
+
+    $event = new CalendarEvent([
+      'uid' => 'test-uid',
+      'start' => $start,
+      'end' => $end,
+      'summary' => "Event with\nnewline",
+      'description' => "Line 1\nLine 2\r\nLine 3",
+    ]);
+
+    $output = $event->generateString();
+
+    self::assertStringContainsString('SUMMARY:Event with\\nnewline', $output);
+    self::assertStringContainsString('DESCRIPTION:Line 1\\nLine 2\\nLine 3', $output);
+  }
+
+  /**
+   * Tests that empty values are handled gracefully.
+   *
+   * @covers ::generateString
+   */
+  public function testEmptyValuesHandled(): void {
+    $start = new \DateTime('2024-01-15 10:00:00', new \DateTimeZone('UTC'));
+    $end = new \DateTime('2024-01-15 11:00:00', new \DateTimeZone('UTC'));
+
+    $event = new CalendarEvent([
+      'uid' => 'test-uid',
+      'start' => $start,
+      'end' => $end,
+      'summary' => '',
+      'description' => NULL,
+      'location' => '',
+    ]);
+
+    $output = $event->generateString();
+
+    // Should not throw an error and should contain the basic structure.
+    self::assertStringContainsString('BEGIN:VEVENT', $output);
+    self::assertStringContainsString('END:VEVENT', $output);
+  }
+
+  /**
+   * Tests that ICS format has no extra whitespace.
+   *
+   * @covers ::generateString
+   */
+  public function testIcsFormatNoExtraWhitespace(): void {
+    $start = new \DateTime('2024-01-15 10:00:00', new \DateTimeZone('UTC'));
+    $end = new \DateTime('2024-01-15 11:00:00', new \DateTimeZone('UTC'));
+
+    $event = new CalendarEvent([
+      'uid' => 'test-uid',
+      'start' => $start,
+      'end' => $end,
+      'summary' => 'Test Event',
+      'description' => '',
+    ]);
+
+    $output = $event->generateString();
+
+    // Check that lines don't have leading whitespace (except after \r\n).
+    $lines = explode("\r\n", $output);
+    foreach ($lines as $line) {
+      if (!empty($line)) {
+        // Lines should not start with whitespace.
+        self::assertDoesNotMatchRegularExpression('/^\s/', $line, "Line should not start with whitespace: '$line'");
+      }
+    }
   }
 
 }

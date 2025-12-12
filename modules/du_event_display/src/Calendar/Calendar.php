@@ -52,16 +52,16 @@ class Calendar {
    * The function generates the actual content of the ICS file and returns it.
    */
   public function generateString() {
-    $content = "BEGIN:VCALENDAR\r\n
-      VERSION:2.0\r\n
-      PRODID:-//" . $this->author . "//NONSGML//EN\r\n
-      X-WR-CALNAME: " . $this->title . "\r\n
-      CALSCALE:GREGORIAN\r\n";
+    $content = "BEGIN:VCALENDAR\r\n";
+    $content .= "VERSION:2.0\r\n";
+    $content .= "PRODID:-//" . $this->author . "//NONSGML//EN\r\n";
+    $content .= "X-WR-CALNAME:" . $this->title . "\r\n";
+    $content .= "CALSCALE:GREGORIAN\r\n";
 
     foreach ($this->events as $event) {
       $content .= $event->generateString();
     }
-    $content .= "END:VCALENDAR";
+    $content .= "END:VCALENDAR\r\n";
     return $content;
   }
 
