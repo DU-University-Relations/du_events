@@ -4,8 +4,12 @@ description: 'Provides a complete suite of tools for importing, displaying, and 
 version: 10.28.0
 core_version_requirement: ^9 || ^10
 package: 'University of Denver'
+components:
+  namespaces:
+    event-organisms: templates/03-organisms
+    event-atoms: templates/01-atoms
+    event-molecules: templates/02-molecules
 dependencies:
   - du_events:du_event_display
-  - du_events:du_event_import
   - du_events:du_event_mini
 

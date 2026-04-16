@@ -1,0 +1,17 @@
+{#
+/**
+ * @file
+ * Default theme implementation for event filter buttons.
+ *
+ * Available variables:
+ * - options: An associative array of filter options, where keys are filter
+ *   values and values are display labels.
+ *
+ * @ingroup themeable
+ */
+#}
+{% if options %}
+  {% for key, label in options %}
+    <button type="button" class="filter-button" data-filter="{{ key }}">{{ label }}</button>
+  {% endfor %}
+{% endif %}
