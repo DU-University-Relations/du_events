@@ -1,9 +1,11 @@
 name: 'DU Events'
 type: module
 description: 'Provides a complete suite of tools for importing, displaying, and managing events.'
-version: 10.28.0
+version: 10.30.0
 core_version_requirement: ^9 || ^10
 package: 'University of Denver'
+lifecycle: deprecated
+lifecycle_link: https://www.wrike.com/open.htm?id=4431182372
 components:
   namespaces:
     event-organisms: templates/03-organisms

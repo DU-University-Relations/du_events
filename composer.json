@@ -1,11 +1,11 @@
 {
   "name":             "university-of-denver/du_events",
-  "version":          "10.28.0",
+  "version":          "10.30.0",
   "description":      "Package of Event Related Features",
   "keywords":         ["University of Denver", "drupal"],
   "homepage":         "http://www.du.edu",
   "license":          "GPL-2.0+",
-  "type":             "drupal-custom-module-package",
+  "type":             "drupal-custom-module",
   "extra": {
       "_README": "DU Events package"
   }

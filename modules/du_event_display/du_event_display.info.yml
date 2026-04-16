@@ -1,7 +1,9 @@
 name: DU Event Display
 description: Custom functionality to display event entities and generate iCal links
 type: module
-version: 10.28.0
+version: 10.30.0
 core_version_requirement: ^8 || ^9 || ^10
 configure: du_event_display.admin_settings
-package: 'DU Events'
+package: 'University of Denver'
+lifecycle: deprecated
+lifecycle_link: https://www.wrike.com/open.htm?id=4431182372
