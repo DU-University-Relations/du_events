@@ -47,3 +47,19 @@ function du_events_theme($existing, $type, $theme, $path) {
   ];
 }
 
+/**
+ * Implements hook_preprocess_paragraph().
+ */
+function du_events_preprocess_paragraph(&$variables) {
+  $variables['#attached']['library'][] = 'du_events/events';
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function du_events_preprocess_node(&$variables) {
+  if ($variables['node']->getType() === 'event') {
+    $variables['#attached']['library'][] = 'du_events/events';
+  }
+}
+
