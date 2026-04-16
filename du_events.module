@@ -50,7 +50,7 @@ function du_events_theme($existing, $type, $theme, $path) {
 /**
  * Implements hook_preprocess_paragraph().
  */
-function du_events_preprocess_paragraph(&$variables) {
+function du_events_preprocess_paragraph__event_list(&$variables) {
   $variables['#attached']['library'][] = 'du_events/events';
 }
 
