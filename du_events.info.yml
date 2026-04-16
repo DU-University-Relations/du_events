@@ -6,6 +6,5 @@ core_version_requirement: ^9 || ^10
 package: 'University of Denver'
 dependencies:
   - du_events:du_event_display
-  - du_events:du_event_import
   - du_events:du_event_mini
 
