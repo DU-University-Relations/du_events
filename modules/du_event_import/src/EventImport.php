@@ -275,7 +275,7 @@ class EventImport {
     $orgs = [];
     $calendar_ids = [];
 
-    /**
+    /*
      * Use calendars from the API response first.
      *
      * Example API response:
@@ -283,13 +283,12 @@ class EventImport {
      *   "187",
      *   "1858"
      * ]
-     *
      */
     if (!empty($event['calendars']) && is_array($event['calendars'])) {
       $calendar_ids = array_filter(array_map('trim', $event['calendars']));
     }
 
-    /**
+    /*
      * Preserve primaryOrg for display/fallback purposes.
      *
      * Direct Import response may return primaryOrg as an object:
@@ -303,7 +302,7 @@ class EventImport {
       $primaryOrg = $event['primaryOrg']['organizationName'] ?? '';
     }
 
-    /**
+    /*
      * Backward compatibility:
      * Some older payloads may return primaryOrg as an array.
      */
@@ -312,7 +311,7 @@ class EventImport {
       $primaryOrg = $event['primaryOrg'][0]['organizationName'] ?? '';
     }
 
-    /**
+    /*
      * Preserve secondaryOrgs for display/fallback purposes.
      */
     if (!empty($event['secondaryOrgs']) && is_array($event['secondaryOrgs'])) {
