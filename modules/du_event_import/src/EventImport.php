@@ -273,26 +273,85 @@ class EventImport {
     $primaryOrg = '';
     $additional_orgs = [];
     $orgs = [];
-    if (!empty($event['primaryOrg'][0]['organizationID'])) {
-      $orgs[] = $event['primaryOrg'][0]['organizationID'];
-      $primaryOrg = $event['primaryOrg'][0]['organizationName'];
+    $calendar_ids = [];
+
+    /**
+     * Use calendars from the API response first.
+     *
+     * Example API response:
+     * "calendars": [
+     *   "187",
+     *   "1858"
+     * ]
+     *
+     */
+    if (!empty($event['calendars']) && is_array($event['calendars'])) {
+      $calendar_ids = array_filter(array_map('trim', $event['calendars']));
     }
-    if (!empty($event['secondaryOrgs'])) {
+
+    /**
+     * Preserve primaryOrg for display/fallback purposes.
+     *
+     * Direct Import response may return primaryOrg as an object:
+     * "primaryOrg": {
+     *   "organizationID": 187,
+     *   "organizationName": "Lamont School of Music"
+     * }
+     */
+    if (!empty($event['primaryOrg']['organizationID'])) {
+      $orgs[] = (string) $event['primaryOrg']['organizationID'];
+      $primaryOrg = $event['primaryOrg']['organizationName'] ?? '';
+    }
+
+    /**
+     * Backward compatibility:
+     * Some older payloads may return primaryOrg as an array.
+     */
+    elseif (!empty($event['primaryOrg'][0]['organizationID'])) {
+      $orgs[] = (string) $event['primaryOrg'][0]['organizationID'];
+      $primaryOrg = $event['primaryOrg'][0]['organizationName'] ?? '';
+    }
+
+    /**
+     * Preserve secondaryOrgs for display/fallback purposes.
+     */
+    if (!empty($event['secondaryOrgs']) && is_array($event['secondaryOrgs'])) {
       foreach ($event['secondaryOrgs'] as $org) {
-        $orgs[] = $org['organizationID'];
-        $additional_orgs[] = ['value' => $org['organizationName']];
+        if (!empty($org['organizationID'])) {
+          $orgs[] = (string) $org['organizationID'];
+        }
+
+        if (!empty($org['organizationName'])) {
+          $additional_orgs[] = ['value' => $org['organizationName']];
+        }
       }
     }
 
-    // Match up org IDs with the unit taxonomy term if the IDs exist.
     $unit_ids = [];
-    if (!empty($orgs)) {
-    $unit_ids = \Drupal::entityQuery('taxonomy_term')
-      ->accessCheck(TRUE)
-      ->condition('vid', 'unit')
-      ->condition('field_25_live_id', $orgs, 'IN')
-      ->execute();
-    };
+
+    /**
+     * PRIMARY PATH:
+     * Match Unit taxonomy terms using calendar/category IDs.
+     */
+    if (!empty($calendar_ids)) {
+      $unit_ids = \Drupal::entityQuery('taxonomy_term')
+        ->accessCheck(TRUE)
+        ->condition('vid', 'unit')
+        ->condition('field_25_live_id', $calendar_ids, 'IN')
+        ->execute();
+    }
+
+    /**
+     * FALLBACK PATH:
+     * If no Unit terms were found from calendars, use the old Organization ID logic.
+     */
+    if (empty($unit_ids) && !empty($orgs)) {
+      $unit_ids = \Drupal::entityQuery('taxonomy_term')
+        ->accessCheck(TRUE)
+        ->condition('vid', 'unit')
+        ->condition('field_25_live_id', $orgs, 'IN')
+        ->execute();
+    }
 
     $description = '';
     if (!empty($event['description'])) {
