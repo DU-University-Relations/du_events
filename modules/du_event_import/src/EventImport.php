@@ -232,67 +232,167 @@ class EventImport {
     }
 
     $eventHash = $this->getHash($event);
+    
+    $audience_terms_array = [];
+    $type_terms_array = [];
 
-    // Get event audiences and types.
-    $audiences = $types = [];
-    $audience_terms_array = $type_terms_array = [];
-    if (!empty($event['audiences'])) {
-      $audiences = $event['audiences'];
+    /**
+     * Map audiences from the API payload to Event Audiences taxonomy terms.
+     */
+    if (!empty($event['audiences']) && is_array($event['audiences'])) {
+      $audiences = [];
+
+      foreach ($event['audiences'] as $audience) {
+        $raw_audience = trim($audience);
+
+        // Convert "Audience - Current Student" to "Current Student".
+        $normalized_audience = preg_replace('/^Audience\s*-\s*/', '', $raw_audience);
+
+        if (!empty($normalized_audience)) {
+          $audiences[] = $normalized_audience;
+        }
+      }
+
+      if (!empty($audiences)) {
+        $audience_terms = \Drupal::entityQuery('taxonomy_term')
+          ->accessCheck(TRUE)
+          ->condition('vid', 'event_audiences')
+          ->condition('name', $audiences, 'IN')
+          ->execute();
+
+        if (!empty($audience_terms)) {
+          foreach ($audience_terms as $term_id) {
+            $audience_terms_array[] = ['target_id' => $term_id];
+          }
+        }
+      }
     }
+    else {
+      \Drupal::logger('du_event_import')->notice('No audiences found in payload or audiences is not an array.');
+    }
+
+    /**
+     * Map eventType from the API payload to Event Types taxonomy terms.
+     */
     if (!empty($event['eventType'])) {
-      $types = $event['eventType'];
-    }
+      $types = [];
+      $raw_event_type = trim($event['eventType']);
 
-    if (!empty($audiences)) {
-      $audience_terms = \Drupal::entityQuery('taxonomy_term')
-        ->accessCheck(TRUE)
-        ->condition('vid', 'event_audiences')
-        ->condition('field_event_api_tag', $audiences, 'IN')
-        ->execute();
-      if (!empty($audience_terms)) {
-        foreach ($audience_terms as $key => $term) {
-          $audience_terms_array[] = ['target_id' => $key];
+      // Remove API prefixes.
+      $normalized_event_type = preg_replace('/^Type\s*-\s*/', '', $raw_event_type);
+      $normalized_event_type = preg_replace('/^Types\s*-\s*/', '', $normalized_event_type);
+
+      // Handle known mismatch between API label and Drupal taxonomy term name.
+      $type_map = [
+        'Arts and Performances' => 'Performing Arts',
+      ];
+
+      $normalized_event_type = $type_map[$normalized_event_type] ?? $normalized_event_type;
+
+      if (!empty($normalized_event_type)) {
+        $types[] = $normalized_event_type;
+      }
+
+      if (!empty($types)) {
+        $type_terms = \Drupal::entityQuery('taxonomy_term')
+          ->accessCheck(TRUE)
+          ->condition('vid', 'event_types')
+          ->condition('name', $types, 'IN')
+          ->execute();
+
+        if (!empty($type_terms)) {
+          foreach ($type_terms as $term_id) {
+            $type_terms_array[] = ['target_id' => $term_id];
+          }
         }
       }
     }
-
-    if (!empty($types)) {
-      $type_terms = \Drupal::entityQuery('taxonomy_term')
-        ->accessCheck(TRUE)
-        ->condition('vid', 'event_types')
-        ->condition('field_event_api_tag', $types, 'IN')
-        ->execute();
-      if (!empty($type_terms)) {
-        foreach ($type_terms as $key => $term) {
-          $type_terms_array[] = ['target_id' => $key];
-        }
-      }
+    else {
+      \Drupal::logger('du_event_import')->notice('No eventType found in payload.');
     }
-
 
     $primaryOrg = '';
     $additional_orgs = [];
     $orgs = [];
-    if (!empty($event['primaryOrg'][0]['organizationID'])) {
-      $orgs[] = $event['primaryOrg'][0]['organizationID'];
-      $primaryOrg = $event['primaryOrg'][0]['organizationName'];
+    $calendar_ids = [];
+
+    /**
+     * Use calendars from the API response first.
+     *
+     * Example API response:
+     * "calendars": [
+     *   "187",
+     *   "1858"
+     * ]
+     *
+     */
+    if (!empty($event['calendars']) && is_array($event['calendars'])) {
+      $calendar_ids = array_filter(array_map('trim', $event['calendars']));
     }
-    if (!empty($event['secondaryOrgs'])) {
+
+    /**
+     * Preserve primaryOrg for display/fallback purposes.
+     *
+     * Direct Import response may return primaryOrg as an object:
+     * "primaryOrg": {
+     *   "organizationID": 187,
+     *   "organizationName": "Lamont School of Music"
+     * }
+     */
+    if (!empty($event['primaryOrg']['organizationID'])) {
+      $orgs[] = (string) $event['primaryOrg']['organizationID'];
+      $primaryOrg = $event['primaryOrg']['organizationName'] ?? '';
+    }
+
+    /**
+     * Backward compatibility:
+     * Some older payloads may return primaryOrg as an array.
+     */
+    elseif (!empty($event['primaryOrg'][0]['organizationID'])) {
+      $orgs[] = (string) $event['primaryOrg'][0]['organizationID'];
+      $primaryOrg = $event['primaryOrg'][0]['organizationName'] ?? '';
+    }
+
+    /**
+     * Preserve secondaryOrgs for display/fallback purposes.
+     */
+    if (!empty($event['secondaryOrgs']) && is_array($event['secondaryOrgs'])) {
       foreach ($event['secondaryOrgs'] as $org) {
-        $orgs[] = $org['organizationID'];
-        $additional_orgs[] = ['value' => $org['organizationName']];
+        if (!empty($org['organizationID'])) {
+          $orgs[] = (string) $org['organizationID'];
+        }
+
+        if (!empty($org['organizationName'])) {
+          $additional_orgs[] = ['value' => $org['organizationName']];
+        }
       }
     }
 
-    // Match up org IDs with the unit taxonomy term if the IDs exist.
     $unit_ids = [];
-    if (!empty($orgs)) {
-    $unit_ids = \Drupal::entityQuery('taxonomy_term')
-      ->accessCheck(TRUE)
-      ->condition('vid', 'unit')
-      ->condition('field_25_live_id', $orgs, 'IN')
-      ->execute();
-    };
+
+    /**
+     * PRIMARY PATH:
+     * Match Unit taxonomy terms using calendar/category IDs.
+     */
+    if (!empty($calendar_ids)) {
+      $unit_ids = \Drupal::entityQuery('taxonomy_term')
+        ->accessCheck(TRUE)
+        ->condition('vid', 'unit')
+        ->condition('field_25_live_id', $calendar_ids, 'IN')
+        ->execute();
+    }
+
+    /**
+     * FALLBACK PATH:
+     * If no Unit terms were found from calendars, use the old Organization ID logic.
+     */
+    if (empty($unit_ids) && !empty($orgs)) {
+      $unit_ids = \Drupal::entityQuery('taxonomy_term')
+        ->accessCheck(TRUE)
+        ->condition('vid', 'unit')
+        ->condition('field_25_live_id', $orgs, 'IN')
+        ->execute();
+    }
 
     $description = '';
     if (!empty($event['description'])) {
