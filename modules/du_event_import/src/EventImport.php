@@ -265,10 +265,10 @@ class EventImport {
             $audience_terms_array[] = ['target_id' => $term_id];
           }
         }
+        else {
+          \Drupal::logger('du_event_import')->debug('Audiences were provided in the payload, but no matching event audience taxonomy terms were found.');
+        }
       }
-    }
-    else {
-      \Drupal::logger('du_event_import')->notice('No audiences found in payload or audiences is not an array.');
     }
 
     /**
