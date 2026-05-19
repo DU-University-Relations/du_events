@@ -232,7 +232,7 @@ class EventImport {
     }
 
     $eventHash = $this->getHash($event);
-    
+
     $audience_terms_array = [];
     $type_terms_array = [];
 
