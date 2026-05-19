@@ -276,22 +276,36 @@ class EventImport {
      */
     if (!empty($event['eventType'])) {
       $types = [];
-      $raw_event_type = trim($event['eventType']);
-
-      // Remove API prefixes.
-      $normalized_event_type = preg_replace('/^Type\s*-\s*/', '', $raw_event_type);
-      $normalized_event_type = preg_replace('/^Types\s*-\s*/', '', $normalized_event_type);
+      $raw_event_types = is_array($event['eventType']) ? $event['eventType'] : [$event['eventType']];
 
       // Handle known mismatch between API label and Drupal taxonomy term name.
       $type_map = [
         'Arts and Performances' => 'Performing Arts',
       ];
 
-      $normalized_event_type = $type_map[$normalized_event_type] ?? $normalized_event_type;
+      foreach ($raw_event_types as $raw_event_type) {
+        if (!is_scalar($raw_event_type)) {
+          continue;
+        }
 
-      if (!empty($normalized_event_type)) {
-        $types[] = $normalized_event_type;
+        $raw_event_type = trim((string) $raw_event_type);
+
+        if ($raw_event_type === '') {
+          continue;
+        }
+
+        // Remove API prefixes.
+        $normalized_event_type = preg_replace('/^Type\s*-\s*/', '', $raw_event_type);
+        $normalized_event_type = preg_replace('/^Types\s*-\s*/', '', $normalized_event_type);
+
+        $normalized_event_type = $type_map[$normalized_event_type] ?? $normalized_event_type;
+
+        if (!empty($normalized_event_type)) {
+          $types[] = $normalized_event_type;
+        }
       }
+
+      $types = array_values(array_unique($types));
 
       if (!empty($types)) {
         $type_terms = \Drupal::entityQuery('taxonomy_term')
