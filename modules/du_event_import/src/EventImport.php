@@ -305,10 +305,12 @@ class EventImport {
             $type_terms_array[] = ['target_id' => $term_id];
           }
         }
+        else {
+          \Drupal::logger('du_event_import')->notice('No matching event type taxonomy term found for eventType: @event_type', [
+            '@event_type' => $normalized_event_type,
+          ]);
+        }
       }
-    }
-    else {
-      \Drupal::logger('du_event_import')->notice('No eventType found in payload.');
     }
 
     $primaryOrg = '';
