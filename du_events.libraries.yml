@@ -3,3 +3,8 @@ events:
   css:
     theme:
       css/events.css: {}
+
+calendar:
+  version: 1.x
+  js:
+    js/calendar.js: {}

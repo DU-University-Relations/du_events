@@ -52,6 +52,7 @@ function du_events_theme($existing, $type, $theme, $path) {
  */
 function du_events_preprocess_paragraph__event_list(&$variables) {
   $variables['#attached']['library'][] = 'du_events/events';
+  $variables['#attached']['library'][] = 'du_events/calendar';
 }
 
 /**
