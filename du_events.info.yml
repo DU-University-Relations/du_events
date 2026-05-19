@@ -1,7 +1,7 @@
 name: 'DU Events'
 type: module
 description: 'Provides a complete suite of tools for importing, displaying, and managing events.'
-version: 10.30.0
+version: 10.31.0
 core_version_requirement: ^9 || ^10
 package: 'University of Denver'
 lifecycle: deprecated
