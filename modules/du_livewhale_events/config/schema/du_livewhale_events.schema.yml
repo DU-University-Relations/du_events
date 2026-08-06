@@ -1,0 +1,7 @@
+du_livewhale_events.settings:
+  type: config_object
+  label: 'DU LiveWhale Events settings'
+  mapping:
+    script_url:
+      type: uri
+      label: 'LiveWhale widget script URL'

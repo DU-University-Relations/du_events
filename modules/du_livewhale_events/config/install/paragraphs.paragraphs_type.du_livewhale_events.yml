@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+id: du_livewhale_events
+label: 'DU LiveWhale Events'
+icon_uuid: null
+icon_default: null
+description: 'Displays events from a saved LiveWhale widget, optionally filtered by group.'
+behavior_plugins: {  }

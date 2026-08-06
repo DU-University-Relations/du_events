@@ -1,0 +1,7 @@
+du_livewhale_events.settings:
+  path: '/admin/config/services/du-livewhale-events'
+  defaults:
+    _form: '\Drupal\du_livewhale_events\Form\SettingsForm'
+    _title: 'DU LiveWhale Events settings'
+  requirements:
+    _permission: 'administer site configuration'

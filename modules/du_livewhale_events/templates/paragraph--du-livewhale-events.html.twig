@@ -1,0 +1,14 @@
+{%
+  set classes = [
+    'paragraph',
+    'paragraph--type--' ~ paragraph.bundle|clean_class,
+    view_mode ? 'paragraph--view-mode--' ~ view_mode|clean_class,
+    not paragraph.isPublished() ? 'paragraph--unpublished',
+  ]
+%}
+
+{% if du_livewhale_options %}
+  <div{{ attributes.addClass(classes) }}>
+    <div class="lwcw" data-options="{{ du_livewhale_options }}"></div>
+  </div>
+{% endif %}

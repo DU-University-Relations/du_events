@@ -1,0 +1,5 @@
+du_livewhale_events.settings:
+  title: 'DU LiveWhale Events'
+  description: 'Configure the LiveWhale widget script URL.'
+  parent: system.admin_config_services
+  route_name: du_livewhale_events.settings

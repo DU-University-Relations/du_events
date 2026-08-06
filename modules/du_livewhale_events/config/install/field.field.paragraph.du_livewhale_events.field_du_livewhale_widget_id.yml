@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_du_livewhale_widget_id
+    - paragraphs.paragraphs_type.du_livewhale_events
+  module:
+    - options
+id: paragraph.du_livewhale_events.field_du_livewhale_widget_id
+field_name: field_du_livewhale_widget_id
+entity_type: paragraph
+bundle: du_livewhale_events
+label: 'Display type'
+description: 'Select the saved LiveWhale widget that controls the event layout.'
+required: true
+translatable: false
+default_value:
+  -
+    value: 11
+default_value_callback: ''
+settings: {  }
+field_type: list_integer
