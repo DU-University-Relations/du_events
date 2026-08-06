@@ -17,7 +17,7 @@ You will need to have a local development environment set up with a DU Core prof
 will need to enable the DU Events package and the DU Functional Testing module to run the tests.
 
 ```bash
-ddev drush en du_events du_functional_testing -y
+ddev drush en du_events du_livewhale_events du_functional_testing -y
 ```
 
 ## Running Tests
@@ -34,11 +34,18 @@ cat playwright.config.js
 # Run tests targeting the du_events package.
 npx playwright test --grep @du_events
 
+# Run the LiveWhale integration tests against the configured real service.
+npx playwright test --grep @du_livewhale_events
+
 # Run all tests.
 npx playwright test 
 
 # Run tests against a Pantheon environment.
 PLAYWRIGHT_BASE_URL="https://test-site.pantheonsite.io/" npx playwright test --grep @du_events 
+
+# The target site must have du_livewhale_events enabled and the standard Page
+# content type with its Page Content Paragraph field.
+PLAYWRIGHT_BASE_URL="https://test-site.pantheonsite.io/" npx playwright test --grep @du_livewhale_events
 ```
 
 ## Structure

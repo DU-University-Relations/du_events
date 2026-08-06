@@ -5,8 +5,36 @@
  * Provides LiveWhale event widget Paragraph rendering.
  */
 
-use Drupal\du_livewhale_events\LiveWhaleOptions;
-use Drupal\du_livewhale_events\LiveWhaleScriptUrl;
+/**
+ * The staging script used by a new module installation.
+ */
+const DU_LIVEWHALE_EVENTS_DEFAULT_SCRIPT_URL = 'https://du-staging.lwcal.com/livewhale/theme/core/scripts/lwcw.js';
+
+/**
+ * The required path for the LiveWhale widget loader.
+ */
+const DU_LIVEWHALE_EVENTS_SCRIPT_PATH = '/livewhale/theme/core/scripts/lwcw.js';
+
+/**
+ * Determines whether a value is a supported LiveWhale widget script URL.
+ *
+ * @param mixed $url
+ *   The URL to validate.
+ *
+ * @return bool
+ *   TRUE when the value is an absolute HTTPS URL with the expected path.
+ */
+function du_livewhale_events_script_url_is_valid($url) {
+  if (!is_string($url) || filter_var($url, FILTER_VALIDATE_URL) === FALSE) {
+    return FALSE;
+  }
+
+  if (strtolower((string) parse_url($url, PHP_URL_SCHEME)) !== 'https') {
+    return FALSE;
+  }
+
+  return parse_url($url, PHP_URL_PATH) === DU_LIVEWHALE_EVENTS_SCRIPT_PATH;
+}
 
 /**
  * Implements hook_library_info_build().
@@ -15,8 +43,8 @@ function du_livewhale_events_library_info_build() {
   $script_url = \Drupal::config('du_livewhale_events.settings')->get('script_url');
 
   // Protect rendering from an invalid settings.php override or stale config.
-  if (!LiveWhaleScriptUrl::isValid($script_url)) {
-    $script_url = LiveWhaleScriptUrl::DEFAULT_URL;
+  if (!du_livewhale_events_script_url_is_valid($script_url)) {
+    $script_url = DU_LIVEWHALE_EVENTS_DEFAULT_SCRIPT_URL;
   }
 
   return [
@@ -33,6 +61,54 @@ function du_livewhale_events_library_info_build() {
       ],
     ],
   ];
+}
+
+/**
+ * Builds the data-options value used by a LiveWhale widget.
+ *
+ * LiveWhale uses ampersands between options and pipes between multiple values
+ * for one option. Encoding each group separately preserves the pipe separator
+ * while protecting reserved characters in a group name.
+ *
+ * @param mixed $widget_id
+ *   The saved LiveWhale widget ID.
+ * @param array $groups
+ *   LiveWhale group names.
+ *
+ * @return string
+ *   The data-options value, or an empty string for an invalid widget ID.
+ */
+function du_livewhale_events_build_options($widget_id, array $groups = []) {
+  $valid_id = filter_var($widget_id, FILTER_VALIDATE_INT, [
+    'options' => ['min_range' => 1],
+  ]);
+
+  if ($valid_id === FALSE) {
+    return '';
+  }
+
+  $options = [
+    'id=' . $valid_id,
+    'format=html',
+  ];
+  $encoded_groups = [];
+
+  foreach ($groups as $group) {
+    $group = trim((string) $group);
+    if ($group === '') {
+      continue;
+    }
+
+    // Keep spaces readable like LiveWhale's examples while URL-encoding
+    // reserved characters such as ampersands and literal pipes.
+    $encoded_groups[] = str_replace('%20', ' ', rawurlencode($group));
+  }
+
+  if ($encoded_groups) {
+    $options[] = 'group=' . implode('|', $encoded_groups);
+  }
+
+  return implode('&', $options);
 }
 
 /**
@@ -66,10 +142,10 @@ function du_livewhale_events_preprocess_paragraph__du_livewhale_events(array &$v
     }
   }
 
-  $variables['du_livewhale_options'] = LiveWhaleOptions::build($widget_id, $groups);
+  $variables['du_livewhale_options'] = du_livewhale_events_build_options($widget_id, $groups);
 
   if ($variables['du_livewhale_options'] !== '') {
-    // Drupal de-duplicates libraries when multiple widgets appear on one page.
+    // Drupal deduplicates libraries when multiple widgets appear on one page.
     $variables['#attached']['library'][] = 'du_livewhale_events/widget';
   }
 }

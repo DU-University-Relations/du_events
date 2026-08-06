@@ -129,18 +129,14 @@ cookie/privacy requirements, and anonymous-page caching before production use.
 
 ## Testing
 
-Run the focused option-builder unit test from the host Drupal project:
+The Playwright integration test creates a page with two LiveWhale Paragraphs,
+loads it anonymously, and verifies that the configured LiveWhale service loads
+and populates both widgets. It intentionally uses the real service so upstream
+availability and integration failures remain visible.
 
 ```shell
-ddev exec vendor/bin/phpunit -c web/core/phpunit.xml.dist \
-  --bootstrap web/modules/packages/du_events/modules/du_livewhale_events/tests/bootstrap.php \
-  web/modules/packages/du_events/modules/du_livewhale_events/tests/src/Unit
+npx playwright test --grep @du_livewhale_events
 ```
 
-For a manual browser proof, verify:
-
-- widget ID `11` renders events
-- the two example groups return the expected events
-- `%26` appears in the HTML attribute for the ampersand-containing group
-- only one `#lw_lwcw` script appears when two Paragraphs are on the page
-- the page fails gracefully if the LiveWhale script is blocked
+For the automated coverage map, executable manual fallback, evidence guidance,
+and failure triage, follow the [LiveWhale UAT](../../docs/livewhale-uat.md).

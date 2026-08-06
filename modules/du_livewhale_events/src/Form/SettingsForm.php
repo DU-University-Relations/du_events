@@ -6,7 +6,6 @@ use Drupal\Core\Asset\LibraryDiscoveryInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\du_livewhale_events\LiveWhaleScriptUrl;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -73,7 +72,7 @@ class SettingsForm extends ConfigFormBase {
       '#type' => 'url',
       '#title' => $this->t('LiveWhale widget script URL'),
       '#description' => $this->t('Enter the complete HTTPS URL to the LiveWhale lwcw.js script for this site. Use the staging host while testing and the live host in production.'),
-      '#default_value' => $effective_config->get('script_url') ?: $stored_config->get('script_url') ?: LiveWhaleScriptUrl::DEFAULT_URL,
+      '#default_value' => $effective_config->get('script_url') ?: $stored_config->get('script_url') ?: \DU_LIVEWHALE_EVENTS_DEFAULT_SCRIPT_URL,
       '#required' => TRUE,
     ];
 
@@ -94,9 +93,9 @@ class SettingsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $script_url = trim($form_state->getValue('script_url'));
 
-    if (!LiveWhaleScriptUrl::isValid($script_url)) {
+    if (!\du_livewhale_events_script_url_is_valid($script_url)) {
       $form_state->setErrorByName('script_url', $this->t('Enter an absolute HTTPS URL ending in @path.', [
-        '@path' => LiveWhaleScriptUrl::SCRIPT_PATH,
+        '@path' => \DU_LIVEWHALE_EVENTS_SCRIPT_PATH,
       ]));
     }
 
