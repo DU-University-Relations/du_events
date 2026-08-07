@@ -9,6 +9,19 @@
 
 {% if du_livewhale_options %}
   <div{{ attributes.addClass(classes) }}>
-    <div class="lwcw" data-options="{{ du_livewhale_options }}"></div>
+    <div
+      class="du-livewhale-events{% if du_livewhale_minimum_height %} du-livewhale-events--reserve-space{% endif %}"
+      {% if du_livewhale_minimum_height %}style="--du-livewhale-events-minimum-height: {{ du_livewhale_minimum_height }}px;"{% endif %}
+      {% if du_livewhale_loading_placeholder_enabled %}data-du-livewhale-loading{% endif %}
+    >
+      <div class="lwcw" data-options="{{ du_livewhale_options }}"></div>
+      {% if du_livewhale_loading_placeholder_enabled %}
+        <div class="du-livewhale-events__placeholder" aria-hidden="true">
+          <span class="du-livewhale-events__spinner"></span>
+          <span class="du-livewhale-events__placeholder-text">{{ du_livewhale_loading_text }}</span>
+        </div>
+        <span class="du-livewhale-events__status visually-hidden" role="status" aria-live="polite">{{ du_livewhale_loading_text }}</span>
+      {% endif %}
+    </div>
   </div>
 {% endif %}

@@ -1,7 +1,7 @@
 # UAT - LiveWhale Event Embeds
 
 **Automation Tag:** `@du_livewhale_events`  
-**Last Updated:** 2026-08-06  
+**Last Updated:** 2026-08-07
 **Owner:** Drupal QA / WebOps
 
 ## Purpose
@@ -24,17 +24,24 @@ functional-testing Drush commands, then visits the page anonymously. It proves:
 
 - both widgets receive the expected encoded `data-options` value;
 - the configured `lwcw.js` loader responds successfully;
-- both widgets display real event cards with nonempty titles; and
-- Drupal attaches only one `script#lw_lwcw` loader to the page.
+- both widgets display real event cards with nonempty titles;
+- Drupal attaches only one `script#lw_lwcw` loader to the page;
+- the enabled loading placeholder reserves the configured height and is
+  removed after styled event cards are ready;
+- disabling the loading enhancement removes its markup and behavior without
+  disabling the independently configured minimum height; and
+- site-configured loading text appears visually and in the accessible status.
 
 The test does not use the editorial form, inspect every LiveWhale network
-request, or exercise the blocked-script behavior. Those checks remain manual.
+request, test the 10-second fail-open path, or exercise the blocked-script
+behavior. Those checks remain manual.
 
 | Status | Spec File | Test Title | Tag | Covers | Notes |
 |---|---|---|---|---|---|
-| Automated | [tests/playwright/e2e/du_livewhale_events.spec.ts](../tests/playwright/e2e/du_livewhale_events.spec.ts) | `LW1 - renders events from the configured LiveWhale service` | `@du_livewhale_events` | TC-002, part of TC-003 | Uses real LiveWhale responses and deletes its generated Page afterward. |
+| Automated | [tests/playwright/e2e/du_livewhale_events.spec.ts](../tests/playwright/e2e/du_livewhale_events.spec.ts) | `LW1 - stabilizes loading and renders events from the real service` | `@du_livewhale_events` | TC-002, part of TC-003 and TC-005 | Delays the real widget request without replacing its response. |
+| Automated | [tests/playwright/e2e/du_livewhale_events.spec.ts](../tests/playwright/e2e/du_livewhale_events.spec.ts) | `LW2 - can disable loading enhancement while retaining reserved height` | `@du_livewhale_events` | Part of TC-005 | Restores the original loading settings afterward. |
 | Manual | N/A | N/A | N/A | TC-001 | The automated fixture bypasses the editorial UI. |
-| Manual | N/A | N/A | N/A | Remaining TC-003 checks, TC-004 | Requires browser developer tools and request blocking. |
+| Manual | N/A | N/A | N/A | Remaining TC-003 through TC-005 checks | Requires browser developer tools, throttling, and request blocking. |
 
 Run the automated test from the host DU profile root:
 
@@ -73,8 +80,21 @@ https://du-staging.lwcal.com/livewhale/theme/core/scripts/lwcw.js
 
 An environment-specific `settings.php` override takes precedence over stored
 Drupal configuration. When an override is active, the settings form displays
-the effective value and disables editing. The selected LiveWhale hostname must
-also be allowed by the site's Content Security Policy.
+the effective URL and disables only that field; loading settings remain
+editable. The selected LiveWhale hostname must also be allowed by the site's
+Content Security Policy.
+
+The same form provides:
+
+| Setting | Default | Behavior |
+|---|---:|---|
+| Enable enhanced loading placeholder | Enabled | Displays a centered loading indicator and reveals the widget after its event cards and LiveWhale stylesheet are ready. |
+| Reserved minimum height | `320` pixels | Establishes a site-wide minimum widget height; `0` disables space reservation. |
+| Loading text | `Loading events…` | Sets the short message displayed beside the spinner and announced to assistive technology. |
+
+The minimum height remains active when the enhanced placeholder is disabled.
+It is a floor, so LiveWhale content can grow taller. Tune the value against
+representative content and mobile as well as desktop layouts.
 
 ## Test Environment and Prerequisites
 
@@ -83,7 +103,7 @@ also be allowed by the site's Content Security Policy.
 - A content-editor role that can create and publish a Page containing
   Paragraphs
 - Anonymous access to the published test page
-- Browser developer tools for TC-003 and TC-004
+- Browser developer tools for TC-003 through TC-005
 
 **Prerequisites:**
 
@@ -250,6 +270,45 @@ not display a PHP exception, generic error page, or broken page shell. After
 request blocking is removed, both event sections render again without changing
 Drupal content or configuration.
 
+### TC-005 - Loading behavior is stable and can be disabled
+
+**User Role:** Administrator and anonymous visitor with browser developer tools
+
+**Test Scenario:** Confirm that the enhanced loading state reserves space,
+reveals styled results, fails open, and can be disabled independently of the
+minimum height.
+
+**Steps:**
+
+1. Record the current loading-placeholder, minimum-height, and loading-text
+   settings.
+2. Enable the enhanced loading placeholder and set the minimum height to
+   `320` pixels. Set the loading text to `Loading upcoming events…`.
+3. In developer tools, disable cache and throttle the connection to Slow 3G.
+4. Reload the Page from TC-001 and confirm a centered spinner and
+   `Loading upcoming events…` appear before the event cards.
+5. Confirm the content below the widget does not first move around an unstyled
+   vertical event list before the final LiveWhale layout appears.
+6. Confirm the loading indicator disappears and event cards become visible
+   after the LiveWhale stylesheet is applied.
+7. Block `*lwcw.js*`, reload, wait at least 10 seconds, and confirm the loading
+   treatment releases rather than leaving the widget permanently hidden.
+8. Remove the block, disable the enhanced loading placeholder, retain a nonzero
+   minimum height, and reload.
+9. Confirm there is no loading indicator and the reserved height still applies
+   while LiveWhale loads normally.
+10. Set the minimum height to `0`, reload, and confirm space reservation is
+    removed.
+11. Restore the original loading settings.
+
+**Expected Result:**
+
+With the enhancement enabled, the configured message appears beside a neutral
+spinner while raw injected markup remains hidden until its remote CSS is ready.
+A stalled integration releases after 10 seconds. With the enhancement disabled,
+no loading-indicator markup or local loading behavior is present; the
+minimum-height setting continues to work independently, and `0` disables it.
+
 ## Evidence and Failure Triage
 
 Record the environment, deployed Git SHA, configured loader URL, browser,
@@ -267,6 +326,8 @@ these signals to identify the likely owner:
 | Loader succeeds but `/live/widget/` fails | LiveWhale widget service, CORS, or saved widget configuration |
 | Requests succeed but no event cards appear | Widget ID, group names, LiveWhale content, or theme markup |
 | One loader and only one of two widgets populates | Widget options or a client-side LiveWhale error |
+| Loading indicator remains longer than 10 seconds | Local loading JavaScript, aggregate/cache state, or an unexpected LiveWhale markup/stylesheet path |
+| Widget appears but content below still shifts | Minimum height does not match final responsive layout or LiveWhale styles changed |
 
 Do not repeatedly rerun an external-service failure without first recording
 evidence. If a later retry passes, record both the failure and recovery times.
@@ -277,14 +338,20 @@ evidence. If a later retry passes, record both the failure and recovery times.
 2. Delete the temporary Page created in TC-001.
 3. Restore the original loader URL only if it was intentionally changed for
    this UAT.
-4. Do not modify or delete saved widgets, groups, or events in LiveWhale.
+4. Restore the original loading-placeholder, minimum-height, and loading-text
+   settings.
+5. Do not modify or delete saved widgets, groups, or events in LiveWhale.
 
 ## Expected Behaviors That Are Not Bugs
 
 - Event content and ordering may change between runs.
 - LiveWhale injects remote HTML into the Drupal Page; it does not render in an
   iframe.
-- The settings form is read-only when `settings.php` overrides the loader URL.
+- Only the loader URL field is read-only when `settings.php` overrides it; the
+  loading settings remain editable.
+- The configured minimum height is intentionally retained after events load.
+  Excess blank space means the value is too large for that layout, not that the
+  widget failed.
 - Event content being absent while LiveWhale is blocked or unavailable is an
   external dependency failure; the Drupal Page shell should still render.
 

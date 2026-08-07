@@ -34,7 +34,8 @@ cat playwright.config.js
 # Run tests targeting the du_events package.
 npx playwright test --grep @du_events
 
-# Run the LiveWhale integration tests against the configured real service.
+# Run the LiveWhale loading and rendering tests against the configured real
+# service. The spec temporarily changes and restores its loading settings.
 npx playwright test --grep @du_livewhale_events
 
 # Run all tests.

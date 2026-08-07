@@ -1,0 +1,55 @@
+/**
+ * @file
+ * Stabilizes the LiveWhale widget while its remote markup and styles load.
+ */
+
+.du-livewhale-events--reserve-space {
+  min-block-size: var(--du-livewhale-events-minimum-height);
+}
+
+.du-livewhale-events__placeholder {
+  display: none;
+}
+
+.du-livewhale-events--loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.du-livewhale-events--loading .lwcw {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+}
+
+.du-livewhale-events--loading .du-livewhale-events__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-block-size: var(--du-livewhale-events-minimum-height, 6rem);
+  padding-block: 2rem;
+  box-sizing: border-box;
+}
+
+.du-livewhale-events__spinner {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  flex: 0 0 1.5rem;
+  border: 3px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+  animation: du-livewhale-events-spin 0.75s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .du-livewhale-events__spinner {
+    animation: none;
+  }
+}
+
+@keyframes du-livewhale-events-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

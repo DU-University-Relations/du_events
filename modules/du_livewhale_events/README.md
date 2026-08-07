@@ -100,6 +100,37 @@ LiveWhale Paragraph on the site; it is intentionally not stored on individual
 Paragraphs. Drupal attaches the resulting library once per page, even when
 several LiveWhale Paragraphs are present.
 
+## Loading behavior
+
+The same settings form controls three independent loading settings:
+
+- **Enable enhanced loading placeholder** reserves the widget area, displays a
+  neutral spinner and loading message, and keeps injected markup out of layout
+  until LiveWhale's event cards and remote stylesheet are ready. The widget
+  fails open after 10 seconds so a loading-integration problem cannot leave
+  populated events permanently hidden.
+- **Reserved minimum height** sets the minimum height of every widget container
+  in pixels. The widget can grow beyond this value. Enter `0` to disable space
+  reservation without changing the loading-placeholder setting.
+- **Loading text** controls the short message displayed beside the spinner and
+  announced to assistive technology. It defaults to `Loading events…`.
+
+The spinner is a small CSS component owned by this submodule. Drupal core's
+AJAX throbber is bundled with the much larger `core/drupal.ajax` behavior, so it
+is not attached for this passive third-party loading state.
+
+New and updated installations default to an enabled placeholder and a `320px`
+minimum height. The value is a site-wide baseline rather than an exact promise:
+LiveWhale content, fonts, and responsive column changes can produce a taller
+final container. Sites should tune it against representative content at
+desktop and mobile widths. Site-specific responsive CSS can override the
+container's `min-block-size` when one administrative value is insufficient.
+
+Disabling the enhanced placeholder removes its loading-indicator markup and
+local JavaScript while preserving the configured minimum height. Setting the
+height to `0` and disabling the placeholder restores LiveWhale's default
+loading behavior.
+
 The setting is stored as normal Drupal configuration in
 `du_livewhale_events.settings`. If multiple deployment environments import the
 same configuration, override the value in environment-specific `settings.php`:
@@ -110,9 +141,18 @@ $config['du_livewhale_events.settings']['script_url'] =
 ```
 
 A `settings.php` override takes precedence over the value saved by the form.
-While an override is active, the form displays the effective value and disables
-editing. Change the override in `settings.php` and rebuild caches when switching
-that environment.
+While a script URL override is active, the form displays the effective value
+and disables only that field. The loading controls remain editable. Change the
+override in `settings.php` and rebuild caches when switching that environment.
+
+Existing installations receive the loading defaults through
+`du_livewhale_events_update_10001()`. Run database updates and rebuild caches
+after deploying this change:
+
+```shell
+ddev drush updb -y
+ddev drush cr
+```
 
 If the site uses a Content Security Policy, allow the selected LiveWhale host
 in the applicable script and connection directives.
@@ -130,9 +170,12 @@ cookie/privacy requirements, and anonymous-page caching before production use.
 ## Testing
 
 The Playwright integration test creates a page with two LiveWhale Paragraphs,
-loads it anonymously, and verifies that the configured LiveWhale service loads
-and populates both widgets. It intentionally uses the real service so upstream
-availability and integration failures remain visible.
+delays but does not mock the real widget request, and verifies the loading state,
+styled reveal, configurable loading text, minimum height, populated widgets,
+and disabled-placeholder behavior. It intentionally uses the real service so
+upstream availability and integration failures remain visible. The test
+temporarily changes the loading settings and restores their original values
+during cleanup.
 
 ```shell
 npx playwright test --grep @du_livewhale_events
