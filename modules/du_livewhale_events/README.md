@@ -119,6 +119,9 @@ The spinner is a small CSS component owned by this submodule. Drupal core's
 AJAX throbber is bundled with the much larger `core/drupal.ajax` behavior, so it
 is not attached for this passive third-party loading state.
 
+For the JavaScript lifecycle, readiness signals, timeout behavior, and
+maintenance contracts, see [`js/README.md`](js/README.md).
+
 New and updated installations default to an enabled placeholder and a `320px`
 minimum height. The value is a site-wide baseline rather than an exact promise:
 LiveWhale content, fonts, and responsive column changes can produce a taller
