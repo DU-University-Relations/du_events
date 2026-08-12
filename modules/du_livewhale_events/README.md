@@ -172,17 +172,19 @@ cookie/privacy requirements, and anonymous-page caching before production use.
 
 ## Testing
 
-The Playwright integration test creates a page with two LiveWhale Paragraphs,
-delays but does not mock the real widget request, and verifies the loading state,
-styled reveal, configurable loading text, minimum height, populated widgets,
-and disabled-placeholder behavior. It intentionally uses the real service so
-upstream availability and integration failures remain visible. The test
-temporarily changes the loading settings and restores their original values
-during cleanup.
+Centralized Playwright coverage uses a published Newman Center fixture and the
+real LiveWhale service. It verifies that the Drupal page responds successfully
+and that LiveWhale renders more than one visible event item. Editorial setup,
+loader diagnostics, loading behavior, and graceful degradation remain in the
+manual UAT contract.
 
 ```shell
-npx playwright test --grep @du_livewhale_events
+SITE=du-newmancenter SITE_ENV=livewhale \
+  npx playwright test tests/sites/du-newmancenter/livewhale.spec.ts \
+  --grep @qa-037
 ```
 
 For the automated coverage map, executable manual fallback, evidence guidance,
-and failure triage, follow the [LiveWhale UAT](../../docs/livewhale-uat.md).
+and failure triage, follow the
+[QA-037 LiveWhale UAT](https://github.com/DU-University-Relations/du-playwright/blob/main/docs/uat/qa-037-livewhale-events.md)
+in the centralized QA repository.

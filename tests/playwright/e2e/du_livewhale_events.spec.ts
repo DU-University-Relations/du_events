@@ -3,7 +3,7 @@ import { drush } from '@du_pw/support/drush';
 
 /**
  * Manual fallback and behavior contract:
- * ../../../docs/livewhale-uat.md
+ * https://github.com/DU-University-Relations/du-playwright/blob/main/docs/uat/qa-037-livewhale-events.md
  */
 test.describe('@du_livewhale_events - LiveWhale event embeds', () => {
   test.describe.configure({ mode: 'serial' });
