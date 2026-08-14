@@ -1,5 +1,58 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { test, expect } from '@du_pw/test';
 import { drush } from '@du_pw/support/drush';
+
+const loadingBehaviorScript = readFileSync(
+  resolve(
+    __dirname,
+    '../../../modules/du_livewhale_events/js/du-livewhale-events-loading.js',
+  ),
+  'utf8',
+);
+
+test('LW0 - recognizes widget-agnostic injected content', async ({ page }) => {
+  await page.route(
+    'https://fixture.example/live/resource/css/widget.css',
+    (route) => route.fulfill({
+      contentType: 'text/css',
+      body: '.classic-events-list { display: block; }',
+    }),
+  );
+  await page.setContent(`
+    <script>
+      window.Drupal = {
+        behaviors: {},
+        t: function (message) { return message; }
+      };
+      window.once = function (id, selector, context) {
+        return Array.from(context.querySelectorAll(selector));
+      };
+    </script>
+    <div data-du-livewhale-loading>
+      <div class="lwcw">
+        <link rel="stylesheet" href="https://fixture.example/live/resource/css/widget.css">
+        <script type="application/json">{}</script>
+      </div>
+      <div class="du-livewhale-events__placeholder">Loading test events…</div>
+      <span class="du-livewhale-events__status"></span>
+    </div>
+  `);
+  await page.addScriptTag({ content: loadingBehaviorScript });
+
+  const container = page.locator('[data-du-livewhale-loading]');
+  await expect(container).toHaveClass(/du-livewhale-events--loading/);
+
+  await page.locator('.lwcw').evaluate((widget) => {
+    const content = document.createElement('div');
+    content.className = 'lwc-event-widget classic-events-list';
+    content.textContent = 'Classic event';
+    widget.append(content);
+  });
+
+  await expect(container).toHaveClass(/du-livewhale-events--loaded/);
+  await expect(container).not.toHaveClass(/du-livewhale-events--timed-out/);
+});
 
 /**
  * Manual fallback and behavior contract:
@@ -10,6 +63,8 @@ test.describe('@du_livewhale_events - LiveWhale event embeds', () => {
 
   const expectedOptions =
     'id=11&format=html&group=Lamont School of Music %26 Theatre|Newman Center';
+  const renderedWidgetContent =
+    ':scope > :not(link):not(script):not(style):not(noscript):not(template)';
 
   let pageNid = '';
   let originalLoadingPlaceholderEnabled = true;
@@ -122,8 +177,12 @@ test.describe('@du_livewhale_events - LiveWhale event embeds', () => {
     for (const widget of await widgets.all()) {
       await expect(widget).toHaveAttribute('data-options', expectedOptions);
       await expect(widget).toHaveClass(/lw_widget_11/);
-      await expect(widget.locator('a.event-card').first()).toBeVisible();
-      await expect(widget.locator('a.event-card h3').first()).not.toHaveText('');
+      await expect(
+        widget.locator(renderedWidgetContent).first(),
+      ).toBeVisible();
+      await expect(
+        widget.locator(renderedWidgetContent).first(),
+      ).not.toHaveText('');
     }
 
     for (const container of await containers.all()) {
@@ -151,8 +210,10 @@ test.describe('@du_livewhale_events - LiveWhale event embeds', () => {
     ).toHaveCount(0);
 
     for (const container of await containers.all()) {
+      const widget = container.locator('.lwcw');
+
       await expect(container).toHaveCSS('min-height', '333px');
-      await expect(container.locator('a.event-card').first()).toBeVisible();
+      await expect(widget.locator(renderedWidgetContent).first()).toBeVisible();
     }
   });
 

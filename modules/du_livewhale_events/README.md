@@ -112,7 +112,8 @@ The form controls three independent loading settings:
 
 - **Enable enhanced loading placeholder** reserves the widget area, displays a
   neutral spinner and loading message, and keeps injected markup out of layout
-  until LiveWhale's event cards and remote stylesheet are ready. The widget
+  until LiveWhale's widget content and remote stylesheet are ready. Readiness
+  does not depend on markup from a specific LiveWhale display type. The widget
   fails open after 10 seconds so a loading-integration problem cannot leave
   populated events permanently hidden.
 - **Reserved minimum height** sets the minimum height of every widget container
@@ -131,7 +132,8 @@ maintenance contracts, see [`js/README.md`](js/README.md).
 New and updated installations default to an enabled placeholder and a `320px`
 minimum height. The value is a site-wide baseline rather than an exact promise:
 LiveWhale content, fonts, and responsive column changes can produce a taller
-final container. Sites should tune it against representative content at
+final container, so the enhancement reduces layout shifts but cannot guarantee
+a zero CLS score. Sites should tune it against representative content at
 desktop and mobile widths. Site-specific responsive CSS can override the
 container's `min-block-size` when one administrative value is insufficient.
 

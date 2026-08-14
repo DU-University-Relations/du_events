@@ -49,12 +49,18 @@ LiveWhale changes two separate parts of the document:
 The script therefore observes both the `.lwcw` subtree and `document.head`.
 After either changes, `checkReady()` requires both of these signals:
 
-- the widget contains an `.event-card`; and
+- the widget contains meaningful injected content, excluding asset-only
+  `<link>`, `<script>`, `<style>`, `<noscript>`, and `<template>` children; and
 - at least one stylesheet whose URL contains `/live/resource/css/` has loaded.
+
+The content check intentionally does not depend on a class from any one
+LiveWhale widget template. The `.lwcw` container is initially empty, so a
+non-asset element child or non-empty text signals that LiveWhale has populated
+the widget while allowing different display types to use different markup.
 
 For a stylesheet that is already ready, the browser exposes a truthy
 `stylesheet.sheet`. For a stylesheet still loading, the script registers a
-one-time `load` listener. A card by itself is not considered ready because
+one-time `load` listener. Content by itself is not considered ready because
 revealing LiveWhale's raw markup before its CSS arrives causes the second layout
 shift this behavior is intended to avoid.
 
@@ -80,20 +86,26 @@ cancels the timeout. On timeout, the loading class is removed so LiveWhale
 content is no longer hidden, even when a selector or remote-stylesheet change
 prevents normal readiness detection.
 
+The enhancement reduces layout shifts but cannot guarantee a zero CLS score.
+The configured minimum height is only a floor; final responsive content can be
+taller, and fonts, images, pagination, or later LiveWhale updates can change the
+widget after it is revealed.
+
 ## Contracts and maintenance
 
 The script intentionally depends on three integration details:
 
 - Drupal renders `[data-du-livewhale-loading]` around one `.lwcw` widget.
-- Populated LiveWhale output contains `.event-card`.
+- LiveWhale injects meaningful content directly into the initially empty
+  `.lwcw` container.
 - LiveWhale's injected stylesheet URL contains `/live/resource/css/`.
 
 If LiveWhale changes its output, verify those selectors before increasing the
 timeout. A consistent ten-second delay usually means one readiness signal is
 missing, not that the timeout is too short.
 
-When debugging, inspect the container classes and `aria-busy`, confirm that an
-`.event-card` exists, and check the document head and Network panel for the
-matching stylesheet. The Playwright coverage delays the real widget request
-without mocking its response so upstream integration failures remain visible.
-
+When debugging, inspect the container classes and `aria-busy`, confirm that a
+non-asset child or non-empty text exists in `.lwcw`, and check the document head
+and Network panel for the matching stylesheet. The Playwright coverage delays
+the real widget request without mocking its response so upstream integration
+failures remain visible.

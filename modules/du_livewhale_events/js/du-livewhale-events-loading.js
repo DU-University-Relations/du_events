@@ -11,6 +11,36 @@
   var failOpenDelay = 10000;
 
   /**
+   * Determines whether LiveWhale has injected meaningful widget content.
+   *
+   * Asset elements can arrive before the widget markup and do not establish
+   * that there is content ready to reveal. All other element children and
+   * non-empty text are treated as widget output so readiness does not depend
+   * on a class owned by one LiveWhale widget template.
+   *
+   * @param {HTMLElement} widget
+   *   The LiveWhale widget container.
+   *
+   * @return {boolean}
+   *   Whether the widget contains meaningful injected content.
+   */
+  function hasMeaningfulContent(widget) {
+    var assetElementNames = ['LINK', 'SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE'];
+
+    return Array.prototype.some.call(widget.childNodes, function (node) {
+      if (node.nodeType === 3) {
+        return node.textContent.trim() !== '';
+      }
+
+      if (node.nodeType !== 1) {
+        return false;
+      }
+
+      return assetElementNames.indexOf(node.tagName) === -1;
+    });
+  }
+
+  /**
    * Initializes one LiveWhale loading placeholder.
    *
    * @param {HTMLElement} container
@@ -63,12 +93,12 @@
     }
 
     /**
-     * Checks whether event cards and their remote stylesheet are ready.
+     * Checks whether injected widget content and its stylesheet are ready.
      */
     function checkReady() {
       var stylesheets;
 
-      if (!widget.querySelector('.event-card')) {
+      if (!hasMeaningfulContent(widget)) {
         return;
       }
 
