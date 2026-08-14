@@ -14,3 +14,6 @@ du_livewhale_events.settings:
     loading_text:
       type: string
       label: 'Loading indicator text'
+    container_max_width:
+      type: string
+      label: 'Events container maximum width'

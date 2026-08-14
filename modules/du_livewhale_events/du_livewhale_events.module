@@ -37,6 +37,32 @@ function du_livewhale_events_script_url_is_valid($url) {
 }
 
 /**
+ * Determines whether a value is a supported container maximum width.
+ *
+ * @param mixed $max_width
+ *   The configured CSS length, or an empty value to disable the constraint.
+ *
+ * @return bool
+ *   TRUE when the value is empty or a positive supported CSS length.
+ */
+function du_livewhale_events_container_max_width_is_valid($max_width) {
+  if (!is_string($max_width)) {
+    return FALSE;
+  }
+
+  $max_width = trim($max_width);
+  if ($max_width === '') {
+    return TRUE;
+  }
+
+  if (!preg_match('/^((?:\d+(?:\.\d+)?|\.\d+))(px|rem|em|%|vw|vh|vmin|vmax|ch)$/iD', $max_width, $matches)) {
+    return FALSE;
+  }
+
+  return (float) $matches[1] > 0;
+}
+
+/**
  * Implements hook_library_info_build().
  */
 function du_livewhale_events_library_info_build() {
@@ -164,6 +190,11 @@ function du_livewhale_events_preprocess_paragraph__du_livewhale_events(array &$v
     $variables['du_livewhale_loading_placeholder_enabled'] = $config->get('loading_placeholder_enabled') ?? TRUE;
     $variables['du_livewhale_minimum_height'] = $minimum_height;
     $variables['du_livewhale_loading_text'] = trim((string) $config->get('loading_text')) ?: 'Loading events…';
+    $container_max_width = trim((string) $config->get('container_max_width'));
+    if (!du_livewhale_events_container_max_width_is_valid($container_max_width)) {
+      $container_max_width = '';
+    }
+    $variables['du_livewhale_container_max_width'] = $container_max_width;
     $variables['#cache']['tags'] = array_merge(
       $variables['#cache']['tags'] ?? [],
       $config->getCacheTags()

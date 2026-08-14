@@ -104,6 +104,14 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['container_max_width'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Events container maximum width'),
+      '#description' => $this->t('Optionally constrain and center every LiveWhale events container. Enter a positive CSS length using px, rem, em, %, vw, vh, vmin, vmax, or ch (for example, 1200px). Leave blank for no module-defined maximum width.'),
+      '#default_value' => $effective_config->get('container_max_width') ?? '',
+      '#maxlength' => 32,
+    ];
+
     $form = parent::buildForm($form, $form_state);
 
     if ($script_url_is_overridden) {
@@ -139,6 +147,11 @@ class SettingsForm extends ConfigFormBase {
       $form_state->setErrorByName('loading_text', $this->t('Enter loading text.'));
     }
 
+    $container_max_width = trim($form_state->getValue('container_max_width'));
+    if (!\du_livewhale_events_container_max_width_is_valid($container_max_width)) {
+      $form_state->setErrorByName('container_max_width', $this->t('Enter a positive CSS length using px, rem, em, %, vw, vh, vmin, vmax, or ch, or leave the field blank.'));
+    }
+
     parent::validateForm($form, $form_state);
   }
 
@@ -157,6 +170,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('loading_placeholder_enabled', (bool) $form_state->getValue('loading_placeholder_enabled'))
       ->set('minimum_height', (int) $form_state->getValue('minimum_height'))
       ->set('loading_text', trim($form_state->getValue('loading_text')))
+      ->set('container_max_width', trim($form_state->getValue('container_max_width')))
       ->save();
 
     // Dynamic library definitions are cached, so rebuild them immediately.

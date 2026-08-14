@@ -27,3 +27,16 @@ function du_livewhale_events_update_10001() {
 
   return t('Added configurable LiveWhale loading-placeholder settings.');
 }
+
+/**
+ * Adds the optional events-container maximum width to existing installations.
+ */
+function du_livewhale_events_update_10002() {
+  $config = \Drupal::configFactory()->getEditable('du_livewhale_events.settings');
+
+  if ($config->get('container_max_width') === NULL) {
+    $config->set('container_max_width', '')->save();
+  }
+
+  return t('Added the optional LiveWhale events-container maximum width setting.');
+}

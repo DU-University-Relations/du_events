@@ -2,3 +2,4 @@ script_url: 'https://du-staging.lwcal.com/livewhale/theme/core/scripts/lwcw.js'
 loading_placeholder_enabled: true
 minimum_height: 320
 loading_text: 'Loading events…'
+container_max_width: ''

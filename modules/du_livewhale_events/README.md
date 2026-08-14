@@ -100,9 +100,15 @@ LiveWhale Paragraph on the site; it is intentionally not stored on individual
 Paragraphs. Drupal attaches the resulting library once per page, even when
 several LiveWhale Paragraphs are present.
 
-## Loading behavior
+## Container width and loading behavior
 
-The same settings form controls three independent loading settings:
+The same settings form also provides an optional **Events container maximum
+width**. Enter a positive CSS length such as `1200px` or `75rem` to constrain
+and center every LiveWhale events container. Leave it blank to let LiveWhale and
+the site's theme control the width. The module applies this only to its stable
+container and does not depend on or override LiveWhale's injected markup.
+
+The form controls three independent loading settings:
 
 - **Enable enhanced loading placeholder** reserves the widget area, displays a
   neutral spinner and loading message, and keeps injected markup out of layout
@@ -149,8 +155,9 @@ and disables only that field. The loading controls remain editable. Change the
 override in `settings.php` and rebuild caches when switching that environment.
 
 Existing installations receive the loading defaults through
-`du_livewhale_events_update_10001()`. Run database updates and rebuild caches
-after deploying this change:
+`du_livewhale_events_update_10001()` and the disabled-by-default container width
+through `du_livewhale_events_update_10002()`. Run database updates and rebuild
+caches after deploying these changes:
 
 ```shell
 ddev drush updb -y

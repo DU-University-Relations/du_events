@@ -7,6 +7,11 @@
   min-block-size: var(--du-livewhale-events-minimum-height);
 }
 
+.du-livewhale-events--constrained {
+  max-width: var(--du-livewhale-events-max-width);
+  margin: 0 auto;
+}
+
 .du-livewhale-events__placeholder {
   display: none;
 }
