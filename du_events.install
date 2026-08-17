@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * @file
+ * Install and update hooks for DU Events.
+ */
+
+/**
+ * Uninstalls deprecated event submodules and enables LiveWhale events.
+ */
+function du_events_update_10001() {
+  $module_handler = \Drupal::moduleHandler();
+  $module_installer = \Drupal::service('module_installer');
+
+  $deprecated = [];
+  foreach (['du_event_display', 'du_event_mini', 'du_event_import'] as $module) {
+    if ($module_handler->moduleExists($module)) {
+      $deprecated[] = $module;
+    }
+  }
+
+  if ($deprecated) {
+    $module_installer->uninstall($deprecated);
+  }
+
+  if (!\Drupal::moduleHandler()->moduleExists('du_livewhale_events')) {
+    $module_installer->install(['du_livewhale_events']);
+  }
+
+  return t('Uninstalled deprecated event modules and installed du_livewhale_events.');
+}
