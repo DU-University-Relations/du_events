@@ -1,10 +1,12 @@
 name: 'DU LiveWhale Events'
 type: module
 description: 'Provides a Paragraph type for embedding LiveWhale event widgets.'
-version: 10.31.0
+version: 10.32.0
 core_version_requirement: ^9 || ^10
 package: 'University of Denver'
 configure: du_livewhale_events.settings
+lifecycle: stable
+lifecycle_link: https://app.asana.com/1/944872971025542/project/1217174021298178/list/1217174389307680
 dependencies:
   - drupal:options
   - paragraphs:paragraphs
