@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * Install and update hooks for DU LiveWhale Events.
+ */
+
+/**
+ * Adds configurable loading-placeholder defaults to existing installations.
+ */
+function du_livewhale_events_update_10001() {
+  $config = \Drupal::configFactory()->getEditable('du_livewhale_events.settings');
+
+  if ($config->get('loading_placeholder_enabled') === NULL) {
+    $config->set('loading_placeholder_enabled', TRUE);
+  }
+
+  if ($config->get('minimum_height') === NULL) {
+    $config->set('minimum_height', 320);
+  }
+
+  if ($config->get('loading_text') === NULL) {
+    $config->set('loading_text', 'Loading events…');
+  }
+
+  $config->save();
+
+  return t('Added configurable LiveWhale loading-placeholder settings.');
+}
+
+/**
+ * Adds the optional events-container maximum width to existing installations.
+ */
+function du_livewhale_events_update_10002() {
+  $config = \Drupal::configFactory()->getEditable('du_livewhale_events.settings');
+
+  if ($config->get('container_max_width') === NULL) {
+    $config->set('container_max_width', '')->save();
+  }
+
+  return t('Added the optional LiveWhale events-container maximum width setting.');
+}

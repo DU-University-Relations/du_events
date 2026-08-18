@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.du_livewhale_events.field_du_livewhale_groups
+    - field.field.paragraph.du_livewhale_events.field_du_livewhale_widget_id
+    - paragraphs.paragraphs_type.du_livewhale_events
+  module:
+    - options
+id: paragraph.du_livewhale_events.default
+targetEntityType: paragraph
+bundle: du_livewhale_events
+mode: default
+content:
+  field_du_livewhale_widget_id:
+    type: options_select
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_du_livewhale_groups:
+    type: string_textfield
+    weight: 1
+    region: content
+    settings:
+      size: 60
+      placeholder: 'Example: Lamont School of Music & Theatre'
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true
+  uid: true

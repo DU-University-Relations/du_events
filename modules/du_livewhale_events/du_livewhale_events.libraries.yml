@@ -1,0 +1,14 @@
+base:
+  version: 1.x
+  css:
+    component:
+      css/du-livewhale-events.css: {}
+
+loading:
+  version: 1.x
+  js:
+    js/du-livewhale-events-loading.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - du_livewhale_events/base

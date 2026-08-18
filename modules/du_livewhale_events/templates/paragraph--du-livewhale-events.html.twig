@@ -1,0 +1,40 @@
+{%
+  set classes = [
+    'paragraph',
+    'paragraph--type--' ~ paragraph.bundle|clean_class,
+    view_mode ? 'paragraph--view-mode--' ~ view_mode|clean_class,
+    not paragraph.isPublished() ? 'paragraph--unpublished',
+  ]
+%}
+
+{% if du_livewhale_options %}
+  {% set container_classes = ['du-livewhale-events'] %}
+  {% set container_styles = [] %}
+
+  {% if du_livewhale_minimum_height %}
+    {% set container_classes = container_classes|merge(['du-livewhale-events--reserve-space']) %}
+    {% set container_styles = container_styles|merge(['--du-livewhale-events-minimum-height: ' ~ du_livewhale_minimum_height ~ 'px;']) %}
+  {% endif %}
+
+  {% if du_livewhale_container_max_width %}
+    {% set container_classes = container_classes|merge(['du-livewhale-events--constrained']) %}
+    {% set container_styles = container_styles|merge(['--du-livewhale-events-max-width: ' ~ du_livewhale_container_max_width ~ ';']) %}
+  {% endif %}
+
+  <div{{ attributes.addClass(classes) }}>
+    <div
+      class="{{ container_classes|join(' ') }}"
+      {% if container_styles %}style="{{ container_styles|join(' ') }}"{% endif %}
+      {% if du_livewhale_loading_placeholder_enabled %}data-du-livewhale-loading{% endif %}
+    >
+      <div class="lwcw" data-options="{{ du_livewhale_options }}"></div>
+      {% if du_livewhale_loading_placeholder_enabled %}
+        <div class="du-livewhale-events__placeholder" aria-hidden="true">
+          <span class="du-livewhale-events__spinner"></span>
+          <span class="du-livewhale-events__placeholder-text">{{ du_livewhale_loading_text }}</span>
+        </div>
+        <span class="du-livewhale-events__status visually-hidden" role="status" aria-live="polite">{{ du_livewhale_loading_text }}</span>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

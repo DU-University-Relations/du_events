@@ -1,0 +1,19 @@
+du_livewhale_events.settings:
+  type: config_object
+  label: 'DU LiveWhale Events settings'
+  mapping:
+    script_url:
+      type: uri
+      label: 'LiveWhale widget script URL'
+    loading_placeholder_enabled:
+      type: boolean
+      label: 'Enable the enhanced loading placeholder'
+    minimum_height:
+      type: integer
+      label: 'Reserved minimum height in pixels'
+    loading_text:
+      type: string
+      label: 'Loading indicator text'
+    container_max_width:
+      type: string
+      label: 'Events container maximum width'

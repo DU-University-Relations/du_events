@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.du_livewhale_events.field_du_livewhale_groups
+    - field.field.paragraph.du_livewhale_events.field_du_livewhale_widget_id
+    - paragraphs.paragraphs_type.du_livewhale_events
+id: paragraph.du_livewhale_events.default
+targetEntityType: paragraph
+bundle: du_livewhale_events
+mode: default
+content: {  }
+hidden:
+  field_du_livewhale_groups: true
+  field_du_livewhale_widget_id: true
