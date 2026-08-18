@@ -1,7 +1,7 @@
 name: 'DU Events'
 type: module
 description: 'Provides a way to load events from LiveWhale onto a Drupal site.'
-version: 10.32.0
+version: 10.32.1
 core_version_requirement: ^9 || ^10
 package: 'University of Denver'
 lifecycle: stable
