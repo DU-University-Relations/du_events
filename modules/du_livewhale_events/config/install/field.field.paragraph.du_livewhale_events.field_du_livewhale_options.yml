@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_du_livewhale_options
+    - paragraphs.paragraphs_type.du_livewhale_events
+id: paragraph.du_livewhale_events.field_du_livewhale_options
+field_name: field_du_livewhale_options
+entity_type: paragraph
+bundle: du_livewhale_events
+label: 'Advanced data-options override'
+description: 'Optional. Paste the complete value of the LiveWhale embed data-options attribute. When populated, this replaces the Display type and Groups settings above. Manage and verify advanced widget settings in LiveWhale. Incorrect values may result in no events being displayed.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
