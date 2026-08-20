@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.field.paragraph.du_livewhale_events.field_du_livewhale_groups
+    - field.field.paragraph.du_livewhale_events.field_du_livewhale_options
     - field.field.paragraph.du_livewhale_events.field_du_livewhale_widget_id
     - paragraphs.paragraphs_type.du_livewhale_events
   module:
@@ -25,6 +26,14 @@ content:
     settings:
       size: 60
       placeholder: 'Example: Lamont School of Music & Theatre'
+    third_party_settings: {  }
+  field_du_livewhale_options:
+    type: string_textfield
+    weight: 2
+    region: content
+    settings:
+      size: 120
+      placeholder: 'Example: id=11&format=html&group=Newman Center&tag=Featured'
     third_party_settings: {  }
 hidden:
   created: true

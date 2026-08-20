@@ -40,3 +40,82 @@ function du_livewhale_events_update_10002() {
 
   return t('Added the optional LiveWhale events-container maximum width setting.');
 }
+
+/**
+ * Adds the optional complete data-options override to existing Paragraphs.
+ */
+function du_livewhale_events_update_10003() {
+  $field_name = 'field_du_livewhale_options';
+
+  $storage = \Drupal\field\Entity\FieldStorageConfig::loadByName(
+    'paragraph',
+    $field_name
+  );
+  if (!$storage) {
+    $storage = \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => 'paragraph',
+      'type' => 'string',
+      'settings' => [
+        'max_length' => 2048,
+        'case_sensitive' => FALSE,
+        'is_ascii' => FALSE,
+      ],
+      'cardinality' => 1,
+      'translatable' => TRUE,
+    ]);
+    $storage->save();
+  }
+
+  $field = \Drupal\field\Entity\FieldConfig::loadByName(
+    'paragraph',
+    'du_livewhale_events',
+    $field_name
+  );
+  if (!$field) {
+    $field = \Drupal\field\Entity\FieldConfig::create([
+      'field_storage' => $storage,
+      'bundle' => 'du_livewhale_events',
+      'label' => 'Advanced data-options override',
+      'description' => 'Optional. Paste the complete value of the LiveWhale '
+        . 'embed data-options attribute. When populated, this replaces the '
+        . 'Display type and Groups settings above. Manage and verify advanced '
+        . 'widget settings in LiveWhale using the <a href="https://support.'
+        . 'livewhale.com/calendar-onboarding/widgets-and-api/">widget and API '
+        . 'documentation</a>. Incorrect values may result in no events being '
+        . 'displayed.',
+      'required' => FALSE,
+      'translatable' => FALSE,
+    ]);
+    $field->save();
+  }
+
+  $form_display = \Drupal\Core\Entity\Entity\EntityFormDisplay::load(
+    'paragraph.du_livewhale_events.default'
+  );
+  if ($form_display && !$form_display->getComponent($field_name)) {
+    $weight = 0;
+    foreach ($form_display->getComponents() as $component) {
+      $weight = max($weight, ((int) ($component['weight'] ?? 0)) + 1);
+    }
+
+    $form_display->setComponent($field_name, [
+      'type' => 'string_textfield',
+      'weight' => $weight,
+      'region' => 'content',
+      'settings' => [
+        'size' => 120,
+        'placeholder' => 'Example: id=11&format=html&group=Newman Center&tag=Featured',
+      ],
+    ])->save();
+  }
+
+  $view_display = \Drupal\Core\Entity\Entity\EntityViewDisplay::load(
+    'paragraph.du_livewhale_events.default'
+  );
+  if ($view_display) {
+    $view_display->removeComponent($field_name)->save();
+  }
+
+  return t('Added the optional LiveWhale data-options override field.');
+}

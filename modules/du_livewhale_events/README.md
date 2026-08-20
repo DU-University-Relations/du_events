@@ -27,6 +27,7 @@ The module installs:
 - the `du_livewhale_events` Paragraph type
 - the `field_du_livewhale_widget_id` list field
 - the unlimited `field_du_livewhale_groups` string field
+- the optional `field_du_livewhale_options` string field
 - the default Paragraph form and view displays
 
 Installing a Paragraph type does not automatically allow it in every
@@ -59,6 +60,27 @@ LiveWhale separates multiple values with a pipe (`|`). An ampersand contained
 in a group name is URL-encoded as `%26` so it is not mistaken for the start of
 another widget option. The module performs this encoding; authors should enter
 normal group names and should not add `%26` themselves.
+
+### Advanced data-options override
+
+Routine authors should use the **Display type** and **Groups** fields or manage
+additional filtering in the saved LiveWhale widget. When a page needs advanced
+inline behavior, paste the complete value of LiveWhale's generated
+`data-options` attribute into **Advanced data-options override**. For example:
+
+```text
+id=11&format=html&group=Newman Center&tag=Featured&max=6
+```
+
+When populated, this value replaces the Display type and Groups settings for
+that Paragraph. The module trims surrounding whitespace but otherwise does not
+parse, merge, encode, or validate LiveWhale parameters. The value must remain
+on one line; control characters prevent the widget from rendering. Incorrect
+or outdated LiveWhale options may result in no events being displayed.
+
+Obtain and verify advanced values in LiveWhale's widget editor. Paste only the
+contents of the `data-options` attribute, not the surrounding `<div>` or
+`<script>` embed code.
 
 ## Adding display types
 

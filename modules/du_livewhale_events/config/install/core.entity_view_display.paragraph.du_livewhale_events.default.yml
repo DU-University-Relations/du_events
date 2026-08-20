@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.field.paragraph.du_livewhale_events.field_du_livewhale_groups
+    - field.field.paragraph.du_livewhale_events.field_du_livewhale_options
     - field.field.paragraph.du_livewhale_events.field_du_livewhale_widget_id
     - paragraphs.paragraphs_type.du_livewhale_events
 id: paragraph.du_livewhale_events.default
@@ -12,4 +13,5 @@ mode: default
 content: {  }
 hidden:
   field_du_livewhale_groups: true
+  field_du_livewhale_options: true
   field_du_livewhale_widget_id: true

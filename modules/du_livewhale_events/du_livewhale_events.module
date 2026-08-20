@@ -107,11 +107,39 @@ function du_livewhale_events_library_info_build() {
  *   The saved LiveWhale widget ID.
  * @param array $groups
  *   LiveWhale group names.
+ * @param mixed $options_override
+ *   An optional complete data-options value. When populated, this replaces the
+ *   generated widget ID, format, and groups.
  *
  * @return string
- *   The data-options value, or an empty string for an invalid widget ID.
+ *   The data-options value, or an empty string for an invalid widget ID or
+ *   override.
  */
-function du_livewhale_events_build_options($widget_id, array $groups = []) {
+function du_livewhale_events_build_options(
+  $widget_id,
+  array $groups = [],
+  $options_override = ''
+) {
+  // An empty field value may reach preprocessing as NULL.
+  if ($options_override === NULL) {
+    $options_override = '';
+  }
+
+  if (!is_string($options_override)) {
+    return '';
+  }
+
+  $trimmed_override = trim($options_override);
+  if ($trimmed_override !== '') {
+    // Keep the override a single plain-text attribute value. Twig provides the
+    // HTML escaping when it renders the data-options attribute.
+    if (preg_match('/[\x00-\x1F\x7F]/', $options_override)) {
+      return '';
+    }
+
+    return $trimmed_override;
+  }
+
   $valid_id = filter_var($widget_id, FILTER_VALIDATE_INT, [
     'options' => ['min_range' => 1],
   ]);
@@ -168,6 +196,7 @@ function du_livewhale_events_preprocess_paragraph__du_livewhale_events(array &$v
 
   $widget_id = $paragraph->get('field_du_livewhale_widget_id')->value;
   $groups = [];
+  $options_override = '';
 
   if ($paragraph->hasField('field_du_livewhale_groups')) {
     foreach ($paragraph->get('field_du_livewhale_groups') as $item) {
@@ -175,7 +204,15 @@ function du_livewhale_events_preprocess_paragraph__du_livewhale_events(array &$v
     }
   }
 
-  $variables['du_livewhale_options'] = du_livewhale_events_build_options($widget_id, $groups);
+  if ($paragraph->hasField('field_du_livewhale_options')) {
+    $options_override = $paragraph->get('field_du_livewhale_options')->value;
+  }
+
+  $variables['du_livewhale_options'] = du_livewhale_events_build_options(
+    $widget_id,
+    $groups,
+    $options_override
+  );
 
   if ($variables['du_livewhale_options'] !== '') {
     $config = \Drupal::config('du_livewhale_events.settings');
