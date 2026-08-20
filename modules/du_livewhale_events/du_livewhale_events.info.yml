@@ -1,7 +1,7 @@
 name: 'DU LiveWhale Events'
 type: module
 description: 'Provides a Paragraph type for embedding LiveWhale event widgets.'
-version: 10.32.1
+version: 10.32.2
 core_version_requirement: ^9 || ^10
 package: 'University of Denver'
 configure: du_livewhale_events.settings
