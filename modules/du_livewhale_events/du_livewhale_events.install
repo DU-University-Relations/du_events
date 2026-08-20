@@ -80,8 +80,10 @@ function du_livewhale_events_update_10003() {
       'description' => 'Optional. Paste the complete value of the LiveWhale '
         . 'embed data-options attribute. When populated, this replaces the '
         . 'Display type and Groups settings above. Manage and verify advanced '
-        . 'widget settings in LiveWhale. Incorrect values may result in no '
-        . 'events being displayed.',
+        . 'widget settings in LiveWhale using the <a href="https://support.'
+        . 'livewhale.com/calendar-onboarding/widgets-and-api/">widget and API '
+        . 'documentation</a>. Incorrect values may result in no events being '
+        . 'displayed.',
       'required' => FALSE,
       'translatable' => FALSE,
     ]);
